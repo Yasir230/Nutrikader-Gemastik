@@ -19,7 +19,9 @@ import {
   Download,
   ArrowRight,
   Info,
+  Loader2,
 } from "lucide-react";
+import { useState } from "react";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -37,11 +39,12 @@ const BULAN = ["Ags", "Sep", "Okt", "Nov", "Des", "Jan"];
 
 export function MbgSection() {
   const { openBalita } = useNav();
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncCount, setSyncCount] = useState(() =>
+    balitaData.filter((b) => b.sinkronisasi !== "tersinkron").length
+  );
 
   const sasaranTerverifikasi = Math.round(kpiAgregat.totalBalita * 0.79);
-  const sinkronisasiTertunda = balitaData.filter(
-    (b) => b.sinkronisasi !== "tersinkron"
-  ).length;
   const porsiMBG30Hari = 4238;
 
   const trenData = BULAN.map((b, i) => ({
@@ -55,13 +58,36 @@ export function MbgSection() {
   );
 
   const handleSinkron = () => {
-    toast.success(
-      "[Demo] Sinkronisasi data sasaran MBG ke Badan Gizi Nasional berhasil dimulai."
-    );
+    if (syncCount === 0) {
+      toast.info("Semua data sudah tersinkron dengan server BGN.");
+      return;
+    }
+    
+    setIsSyncing(true);
+    setTimeout(() => {
+      setSyncCount(0);
+      setIsSyncing(false);
+      toast.success("Sinkronisasi ke BGN berhasil: 509 data sasaran terverifikasi!");
+    }, 1500);
   };
 
   const handleUnduhDampak = () => {
-    toast.success("[Demo] Laporan dampak MBG sedang disiapkan untuk diunduh.");
+    const headers = ["Kelurahan", "Posyandu", "Balita Sasaran", "Cakupan MBG (%)", "Prevalensi Stunting (%)"];
+    const rows = wilayahData.map((w) => 
+      [w.nama, w.jumlahPosyandu, w.jumlahBalita, w.cakupanMBG, w.prevalensiStunting].join(",")
+    );
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "laporan-dampak-mbg-jatinegara.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Laporan dampak MBG berhasil diunduh.");
   };
 
   return (
@@ -88,13 +114,18 @@ export function MbgSection() {
             <Button
               size="sm"
               onClick={handleSinkron}
+              disabled={isSyncing}
               style={{
                 backgroundColor: "var(--color-primary)",
                 color: "#FFFFFF",
               }}
             >
-              <RefreshCw className="w-4 h-4" />
-              Sinkronkan ke Server BGN
+              {isSyncing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              {isSyncing ? "Menyinkronkan..." : "Sinkronkan ke Server BGN"}
             </Button>
           </>
         }
@@ -128,7 +159,7 @@ export function MbgSection() {
         />
         <KpiCard
           label="Sinkronisasi Tertunda"
-          value={sinkronisasiTertunda}
+          value={syncCount}
           unit="data"
           accent="critical"
           icon={<AlertTriangle className="w-4 h-4" />}

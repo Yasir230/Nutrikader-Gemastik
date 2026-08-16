@@ -184,7 +184,6 @@ export function DataBalitaSection() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        eyebrow="OPERASIONAL"
         title="Data Balita"
         description="Pencatatan antropometri, status risiko, dan integrasi MBG per balita aktif di seluruh posyandu."
         actions={
@@ -530,7 +529,7 @@ export function DataBalitaSection() {
       {/* Dialog form input antropometri (KF-02) */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent
-          className="sm:max-w-[560px] rounded-[12px]"
+          className="sm:max-w-[560px] rounded-[12px] max-h-[85vh] overflow-y-auto p-4 sm:p-6 border-none"
           style={{ backgroundColor: "#FFFFFF" }}
         >
           <DialogHeader>
@@ -546,8 +545,8 @@ export function DataBalitaSection() {
           </DialogHeader>
 
           <form key={editing?.id ?? "new"} onSubmit={handleSubmit} className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5 col-span-2 sm:col-span-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
                 <Label htmlFor="nik" style={{ color: "var(--color-text)" }}>
                   NIK
                 </Label>
@@ -561,7 +560,7 @@ export function DataBalitaSection() {
                   style={{ borderColor: "rgba(7,30,73,0.14)" }}
                 />
               </div>
-              <div className="space-y-1.5 col-span-2 sm:col-span-1">
+              <div className="space-y-1.5">
                 <Label htmlFor="nama" style={{ color: "var(--color-text)" }}>
                   Nama Balita
                 </Label>
@@ -575,13 +574,13 @@ export function DataBalitaSection() {
                   style={{ borderColor: "rgba(7,30,73,0.14)" }}
                 />
               </div>
-              <div className="space-y-1.5 col-span-2">
+              <div className="space-y-1.5 md:col-span-2">
                 <Label htmlFor="namaIbu" style={{ color: "var(--color-text)" }}>Nama Ibu</Label>
                 <Input id="namaIbu" name="namaIbu" defaultValue={editing?.namaIbu ?? ""} required className="rounded-[4px]" />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label style={{ color: "var(--color-text)" }}>Jenis Kelamin</Label>
                 <RadioGroup
@@ -638,7 +637,7 @@ export function DataBalitaSection() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="beratBadan" style={{ color: "var(--color-text)" }}>BB (kg)</Label>
                 <Input id="beratBadan" name="beratBadan" type="number" step="0.1" defaultValue={editing?.pengukuran.at(-1)?.beratBadan ?? ""} required />
@@ -689,7 +688,7 @@ export function DataBalitaSection() {
                 className="px-4 py-2 rounded-[8px] text-[13px] font-medium"
                 style={{ backgroundColor: "var(--color-primary)", color: "#FFFFFF" }}
               >
-                Simpan & Sinkron
+                Simpan Data Balita
               </button>
             </DialogFooter>
           </form>

@@ -771,7 +771,7 @@ export function DetailBalitaSection() {
             </p>
           </div>
           <div
-            className="max-h-[320px] overflow-y-auto scroll-thin border-t"
+            className="max-h-[320px] overflow-x-auto overflow-y-auto scroll-thin border-t"
             style={{ borderColor: "rgba(181,224,234,0.5)" }}
           >
             <table className="w-full text-[13px]">
@@ -884,7 +884,7 @@ export function DetailBalitaSection() {
             </div>
           ) : (
             <div
-              className="max-h-[320px] overflow-y-auto scroll-thin border-t"
+              className="max-h-[320px] overflow-x-auto overflow-y-auto scroll-thin border-t"
               style={{ borderColor: "rgba(181,224,234,0.5)" }}
             >
               <table className="w-full text-[13px]">

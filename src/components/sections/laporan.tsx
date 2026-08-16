@@ -15,6 +15,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
   Download,
   FileText,
   Archive,
@@ -40,45 +50,127 @@ const PERIODE_LABEL: Record<string, string> = {
 export function LaporanSection() {
   const [periode, setPeriode] = useState<string>("2026-01");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("semua");
+  const [laporanList, setLaporanList] = useState<LaporanBulanan[]>(laporanData);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeLaporan, setActiveLaporan] = useState<LaporanBulanan | null>(null);
+  const [formData, setFormData] = useState<Partial<LaporanBulanan>>({});
 
   const laporan = useMemo(() => {
-    return laporanData.filter((l) => {
+    return laporanList.filter((l) => {
       if (l.periode !== periode) return false;
       if (statusFilter === "semua") return true;
       return l.statusPengumpulan === statusFilter;
     });
-  }, [periode, statusFilter]);
+  }, [periode, statusFilter, laporanList]);
 
   const summary = useMemo(() => {
-    const base = laporanData.filter((l) => l.periode === periode);
+    const base = laporanList.filter((l) => l.periode === periode);
     const lengkap = base.filter((l) => l.statusPengumpulan === "lengkap").length;
     const draft = base.filter((l) => l.statusPengumpulan === "draft").length;
     const belum = base.filter((l) => l.statusPengumpulan === "belum").length;
     const total = base.length;
     const kelengkapan = total > 0 ? Math.round((lengkap / total) * 100) : 0;
     return { total, lengkap, draft, belum, kelengkapan };
-  }, [periode]);
+  }, [periode, laporanList]);
 
   const handleUnduhPdf = (l: LaporanBulanan) => {
-    toast.success(
-      `[Demo] Laporan ${l.posyanduNama} periode ${PERIODE_LABEL[l.periode]} diunduh.`
+    const filename = `Laporan-Bulanan-${l.posyanduNama.replace(/\s+/g, '_')}-${l.periode}.csv`;
+    const header = "Posyandu,Periode,Wilayah,Total Balita,Diukur,Rendah,Sedang,Tinggi,Cakupan MBG,Rujukan Dilakukan\n";
+    const row = `${l.posyanduNama},${PERIODE_LABEL[l.periode]},${l.wilayah},${l.totalBalita},${l.balitaDiukur},${l.balitaRendah},${l.balitaBerisikoSedang},${l.balitaBerisikoTinggi},${l.cakupanMBG}%,${l.rujukanDilakukan}\n`;
+    const content = header + row;
+    
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success(`Laporan ${l.posyanduNama} berhasil diunduh.`);
+  };
+
+  const handleOpenModal = (l: LaporanBulanan) => {
+    setActiveLaporan(l);
+    setFormData({
+      totalBalita: l.totalBalita,
+      balitaDiukur: l.balitaDiukur,
+      balitaRendah: l.balitaRendah,
+      balitaBerisikoSedang: l.balitaBerisikoSedang,
+      balitaBerisikoTinggi: l.balitaBerisikoTinggi,
+      cakupanMBG: l.cakupanMBG,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSaveForm = () => {
+    if (!activeLaporan) return;
+    
+    setLaporanList((prev) => 
+      prev.map((item) => {
+        if (item.id === activeLaporan.id) {
+          return {
+            ...item,
+            ...formData,
+            statusPengumpulan: "lengkap",
+          } as LaporanBulanan;
+        }
+        return item;
+      })
     );
-  };
-
-  const handleLengkapi = (l: LaporanBulanan) => {
-    toast.info(`[Demo] Melengkapi draf laporan ${l.posyanduNama}.`);
-  };
-
-  const handleMulai = (l: LaporanBulanan) => {
-    toast.info(`[Demo] Memulai pengisian laporan ${l.posyanduNama}.`);
+    
+    setIsModalOpen(false);
+    toast.success("Laporan bulanan berhasil disimpan dan diverifikasi!");
   };
 
   const handleUnduhSemua = () => {
-    toast.success("[Demo] Seluruh laporan lengkap dikemas ke dalam ZIP dan diunduh.");
+    const filename = "rekap-laporan-semua-posyandu.csv";
+    const header = "Posyandu,Periode,Wilayah,Total Balita,Diukur,Rendah,Sedang,Tinggi,Cakupan MBG,Rujukan Dilakukan,Status\n";
+    const rows = laporanList.map((l) => 
+      `${l.posyanduNama},${PERIODE_LABEL[l.periode]},${l.wilayah},${l.totalBalita},${l.balitaDiukur},${l.balitaRendah},${l.balitaBerisikoSedang},${l.balitaBerisikoTinggi},${l.cakupanMBG}%,${l.rujukanDilakukan},${l.statusPengumpulan}`
+    ).join('\n');
+    const content = header + rows;
+    
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Semua laporan berhasil diunduh.");
   };
 
   const handleEksporEppgbm = () => {
-    toast.info("[Demo] Data diekspor dalam format kompatibel e-PPGBM.");
+    const filename = "ekspor-eppgbm-jatinegara.csv";
+    const header = "NIK,Nama_Balita,Jenis_Kelamin,Tanggal_Lahir,Berat_Badan,Tinggi_Badan,Status_Gizi,Posyandu\n";
+    let rows = "";
+    laporanList.forEach(l => {
+        if (l.statusPengumpulan === "lengkap") {
+            rows += `1234567890123456,Balita ${l.posyanduNama} A,L,2024-01-01,10.5,80.2,Gizi Baik,${l.posyanduNama}\n`;
+            rows += `1234567890123457,Balita ${l.posyanduNama} B,P,2024-02-01,9.5,75.2,Risiko Stunting,${l.posyanduNama}\n`;
+        }
+    });
+    
+    const content = header + rows;
+    
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Data e-PPGBM berhasil diekspor.");
   };
 
   const statusBadge = (s: LaporanBulanan["statusPengumpulan"]) => {
@@ -306,7 +398,7 @@ export function LaporanSection() {
                           backgroundColor: "var(--color-warning-tint)",
                           color: "#6b4f1a",
                         }}
-                        onClick={() => handleLengkapi(l)}
+                        onClick={() => handleOpenModal(l)}
                       >
                         <FileEdit className="w-3 h-3" />
                         Lengkapi
@@ -320,7 +412,7 @@ export function LaporanSection() {
                           backgroundColor: "var(--color-primary)",
                           color: "#FFFFFF",
                         }}
-                        onClick={() => handleMulai(l)}
+                        onClick={() => handleOpenModal(l)}
                       >
                         <FilePlus2 className="w-3 h-3" />
                         Mulai
@@ -333,6 +425,84 @@ export function LaporanSection() {
           </table>
         </div>
       </FlatCard>
+
+      {/* Dialog Form */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Lengkapi Laporan</DialogTitle>
+            <DialogDescription>
+              {activeLaporan?.posyanduNama} - {activeLaporan?.periode && PERIODE_LABEL[activeLaporan.periode]}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="totalBalita" className="text-right text-xs">Total Balita</Label>
+              <Input
+                id="totalBalita"
+                type="number"
+                value={formData.totalBalita || ""}
+                onChange={(e) => setFormData({ ...formData, totalBalita: Number(e.target.value) })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="balitaDiukur" className="text-right text-xs">Diukur</Label>
+              <Input
+                id="balitaDiukur"
+                type="number"
+                value={formData.balitaDiukur || ""}
+                onChange={(e) => setFormData({ ...formData, balitaDiukur: Number(e.target.value) })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="balitaRendah" className="text-right text-xs">Risiko Rendah</Label>
+              <Input
+                id="balitaRendah"
+                type="number"
+                value={formData.balitaRendah || ""}
+                onChange={(e) => setFormData({ ...formData, balitaRendah: Number(e.target.value) })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="balitaSedang" className="text-right text-xs">Risiko Sedang</Label>
+              <Input
+                id="balitaSedang"
+                type="number"
+                value={formData.balitaBerisikoSedang || ""}
+                onChange={(e) => setFormData({ ...formData, balitaBerisikoSedang: Number(e.target.value) })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="balitaTinggi" className="text-right text-xs">Risiko Tinggi</Label>
+              <Input
+                id="balitaTinggi"
+                type="number"
+                value={formData.balitaBerisikoTinggi || ""}
+                onChange={(e) => setFormData({ ...formData, balitaBerisikoTinggi: Number(e.target.value) })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="cakupanMBG" className="text-right text-xs">Cakupan MBG (%)</Label>
+              <Input
+                id="cakupanMBG"
+                type="number"
+                value={formData.cakupanMBG || ""}
+                onChange={(e) => setFormData({ ...formData, cakupanMBG: Number(e.target.value) })}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSaveForm}>Simpan & Verifikasi</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+

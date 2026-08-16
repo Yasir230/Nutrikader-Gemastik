@@ -82,7 +82,10 @@ export function PetaRisikoSection() {
     const q = query.trim().toLowerCase();
     return balitaData.filter(
       (b) =>
-        b.nama.toLowerCase().includes(q) || b.nik.toLowerCase().includes(q)
+        b.nama.toLowerCase().includes(q) || 
+        b.nik.toLowerCase().includes(q) ||
+        b.posyanduNama.toLowerCase().includes(q) ||
+        b.kelurahan.toLowerCase().includes(q)
     );
   }, [query]);
 
@@ -363,10 +366,15 @@ export function PetaRisikoSection() {
                       NIK {b.nik}
                     </div>
                     <div className="text-[11px] mt-0.5" style={{ color: "var(--color-text-muted)" }}>
-                      {b.posyanduNama} · {b.kelurahan}
+                      Usia {b.usiaBulan} bln · {b.posyanduNama} · {b.kelurahan}
                     </div>
                   </div>
-                  <RiskBadge level={b.risiko} />
+                  <div className="flex flex-col items-end gap-1">
+                    <RiskBadge level={b.risiko} />
+                    <StatusBadge tone={b.risiko === "tinggi" ? "critical" : b.risiko === "sedang" ? "warning" : "success"}>
+                      {b.risiko === "tinggi" ? "Gizi Buruk / Risiko" : b.risiko === "sedang" ? "Gizi Kurang" : "Gizi Baik"}
+                    </StatusBadge>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: "rgba(181,224,234,0.5)" }}>
                   <span className="text-[11px]" style={{ color: "var(--color-text-muted)" }}>
@@ -395,6 +403,21 @@ export function PetaRisikoSection() {
           <div className="mt-4 p-4 rounded-[8px] border text-center text-[13px]"
             style={{ borderColor: "rgba(7,30,73,0.08)", backgroundColor: "var(--color-bg)", color: "var(--color-text-muted)" }}>
             Tidak ada balita yang cocok dengan kriteria pencarian.
+          </div>
+        )}
+
+        {!searched && query.length === 0 && (
+          <div className="mt-4 p-6 rounded-[8px] border border-dashed flex flex-col items-center text-center"
+            style={{ borderColor: "rgba(7,30,73,0.15)", backgroundColor: "rgba(7,30,73,0.02)" }}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2" style={{ backgroundColor: "rgba(7,30,73,0.05)" }}>
+              <Search className="w-5 h-5" style={{ color: "var(--color-text-muted)" }} />
+            </div>
+            <p className="text-[13px] font-medium" style={{ color: "var(--color-text)" }}>
+              Mulai pencarian
+            </p>
+            <p className="text-[12px] mt-1" style={{ color: "var(--color-text-muted)", maxWidth: 300 }}>
+              Ketik nama, NIK, nama posyandu, atau kelurahan untuk mencari data balita secara spesifik.
+            </p>
           </div>
         )}
       </FlatCard>

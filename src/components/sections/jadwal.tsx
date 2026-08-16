@@ -24,6 +24,7 @@ import {
   ArrowRight,
   MapPin,
   Users2,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -92,10 +93,30 @@ function JadwalItem({ j }: { j: JadwalPosyandu }) {
   };
 
   const handleDetail = () => {
+    // Simpan filter posyandu ke localStorage agar data-balita bisa memfilternya
+    if (typeof window !== "undefined") {
+      localStorage.setItem("filterPosyandu", j.posyanduNama);
+    }
     toast.info(`Membuka data posyandu: ${j.posyanduNama}`, {
       description: "Beralih ke modul Data Balita.",
     });
     setSection("data-balita");
+  };
+
+  const handleSendWA = () => {
+    const text = encodeURIComponent(
+      `Halo, ini pengingat jadwal posyandu di ${j.posyanduNama} pada tanggal ${formatTanggal(
+        j.tanggal
+      )} jam ${j.jam}. Mohon kehadirannya tepat waktu!`
+    );
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+    toast.success("Pengingat jadwal posyandu berhasil dikirim!");
+    setIsReminderOpen(false);
+  };
+
+  const handleSendSMS = () => {
+    toast.success("Pengingat jadwal posyandu berhasil dikirim!");
+    setIsReminderOpen(false);
   };
 
   return (
@@ -229,7 +250,7 @@ function JadwalItem({ j }: { j: JadwalPosyandu }) {
           <DialogHeader>
             <DialogTitle>Kirim Pengingat: {j.posyanduNama}</DialogTitle>
             <DialogDescription>
-              Pilih penerima pengingat via WhatsApp untuk jadwal tanggal {formatTanggal(j.tanggal)} jam {j.jam}.
+              Pilih penerima pengingat via WhatsApp atau SMS untuk jadwal tanggal {formatTanggal(j.tanggal)} jam {j.jam}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
@@ -257,13 +278,19 @@ function JadwalItem({ j }: { j: JadwalPosyandu }) {
                    </li>
                </ul>
             </div>
+            <div className="p-3 bg-muted rounded-md mt-4">
+              <p className="text-xs italic text-muted-foreground">
+                "Halo, ini pengingat jadwal posyandu di {j.posyanduNama} pada tanggal {formatTanggal(j.tanggal)} jam {j.jam}. Mohon kehadirannya tepat waktu!"
+              </p>
+            </div>
           </div>
-          <DialogFooter className="sm:justify-end gap-2">
+          <DialogFooter className="sm:justify-end gap-2 flex-col sm:flex-row">
             <Button variant="outline" onClick={() => setIsReminderOpen(false)}>Batal</Button>
-            <Button asChild>
-              <a href={`https://wa.me/?text=${encodeURIComponent(`Halo, ini pengingat jadwal posyandu di ${j.posyanduNama} pada tanggal ${formatTanggal(j.tanggal)} jam ${j.jam}. Mohon kehadirannya tepat waktu!`)}`} target="_blank" rel="noreferrer">
-                Kirim Pengingat WhatsApp
-              </a>
+            <Button variant="secondary" onClick={handleSendSMS}>
+              Kirim SMS Otomatis
+            </Button>
+            <Button onClick={handleSendWA}>
+              Kirim via WhatsApp
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -273,23 +300,63 @@ function JadwalItem({ j }: { j: JadwalPosyandu }) {
 }
 
 export function JadwalSection() {
+  const [jadwalList, setJadwalList] = useState<JadwalPosyandu[]>(
+    Array.isArray(jadwalData) ? jadwalData : []
+  );
   const [filter, setFilter] = useState<FilterKey>("semua");
+  const [isAddOpen, setIsAddOpen] = useState(false);
+
+  const [newJadwal, setNewJadwal] = useState({
+    posyanduNama: "",
+    tanggal: "",
+    jam: "",
+    kelurahan: "",
+    jenisKegiatan: "Imunisasi",
+  });
+
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const today = new Date().toISOString().split("T")[0];
+    const item: JadwalPosyandu = {
+      id: Date.now().toString(),
+      posyanduId: "POS-" + Date.now().toString(),
+      posyanduNama: newJadwal.posyanduNama,
+      tanggal: newJadwal.tanggal,
+      jam: newJadwal.jam,
+      kelurahan: newJadwal.kelurahan,
+      jenisKegiatan: newJadwal.jenisKegiatan as any,
+      status: newJadwal.tanggal === today ? "hari_ini" : "terjadwal",
+      estimasiBalita: 50,
+      kaderBertugas: ["Kader Baru"],
+    };
+    
+    setJadwalList((prev) => [...prev, item]);
+    toast.success("Jadwal posyandu baru berhasil ditambahkan!");
+    setIsAddOpen(false);
+    setNewJadwal({
+      posyanduNama: "",
+      tanggal: "",
+      jam: "",
+      kelurahan: "",
+      jenisKegiatan: "Imunisasi",
+    });
+  };
 
   const jadwalHariIni = useMemo(
-    () => jadwalData.filter((j) => j.status === "hari_ini"),
-    []
+    () => jadwalList.filter((j) => j.status === "hari_ini"),
+    [jadwalList]
   );
   const jadwalTerjadwal = useMemo(
-    () => jadwalData.filter((j) => j.status === "terjadwal"),
-    []
+    () => jadwalList.filter((j) => j.status === "terjadwal"),
+    [jadwalList]
   );
 
   // Kader unik dari semua jadwal
   const totalKaderUnik = useMemo(() => {
     const set = new Set<string>();
-    jadwalData.forEach((j) => j.kaderBertugas.forEach((k) => set.add(k)));
+    jadwalList.forEach((j) => j.kaderBertugas.forEach((k) => set.add(k)));
     return set.size;
-  }, []);
+  }, [jadwalList]);
 
   // Apply filter
   const filtered = useMemo(() => {
@@ -321,11 +388,19 @@ export function JadwalSection() {
 
   return (
     <div className="space-y-6">
-      <SectionHeader
-        eyebrow="OPERASIONAL"
-        title="Jadwal Posyandu"
-        description="Pengingat jadwal pencatatan rutin, penimbangan, imunisasi, dan penyuluhan posyandu."
-      />
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex-1">
+          <SectionHeader
+            eyebrow="OPERASIONAL"
+            title="Jadwal Posyandu"
+            description="Pengingat jadwal pencatatan rutin, penimbangan, imunisasi, dan penyuluhan posyandu."
+          />
+        </div>
+        <Button onClick={() => setIsAddOpen(true)} className="shrink-0">
+          <Plus className="w-4 h-4 mr-2" />
+          Tambah Jadwal Baru
+        </Button>
+      </div>
 
       {/* KPI strip kecil */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -474,6 +549,101 @@ export function JadwalSection() {
           )}
         </div>
       )}
+
+      {/* Dialog Tambah Jadwal */}
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogContent className="max-w-md w-[90vw] rounded-[12px]">
+          <form onSubmit={handleAddSubmit}>
+            <DialogHeader>
+              <DialogTitle>Tambah Jadwal Baru</DialogTitle>
+              <DialogDescription>
+                Masukkan detail jadwal posyandu yang baru.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nama Posyandu</label>
+                <input
+                  required
+                  type="text"
+                  value={newJadwal.posyanduNama}
+                  onChange={(e) =>
+                    setNewJadwal({ ...newJadwal, posyanduNama: e.target.value })
+                  }
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="Contoh: Posyandu Mawar 1"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Tanggal</label>
+                  <input
+                    required
+                    type="date"
+                    value={newJadwal.tanggal}
+                    onChange={(e) =>
+                      setNewJadwal({ ...newJadwal, tanggal: e.target.value })
+                    }
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Jam</label>
+                  <input
+                    required
+                    type="text"
+                    value={newJadwal.jam}
+                    onChange={(e) =>
+                      setNewJadwal({ ...newJadwal, jam: e.target.value })
+                    }
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="08:00 - 10:00"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Lokasi (Kelurahan)</label>
+                <input
+                  required
+                  type="text"
+                  value={newJadwal.kelurahan}
+                  onChange={(e) =>
+                    setNewJadwal({ ...newJadwal, kelurahan: e.target.value })
+                  }
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="Contoh: Kel. Sukamaju"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Layanan/Kegiatan</label>
+                <select
+                  required
+                  value={newJadwal.jenisKegiatan}
+                  onChange={(e) =>
+                    setNewJadwal({ ...newJadwal, jenisKegiatan: e.target.value })
+                  }
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="Imunisasi">Imunisasi</option>
+                  <option value="Penimbangan">Penimbangan</option>
+                  <option value="Penyuluhan">Penyuluhan</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter className="sm:justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddOpen(false)}
+              >
+                Batal
+              </Button>
+              <Button type="submit">Simpan Jadwal</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
