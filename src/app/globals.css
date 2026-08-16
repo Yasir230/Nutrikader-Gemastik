@@ -1,0 +1,288 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-plus-jakarta);
+  --font-mono: var(--font-ibm-plex-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.5rem;
+  /* MBG/BGN Design System Tokens */
+  --color-primary: #071E49;
+  --color-success: #92D05D;
+  --color-info: #B5E0EA;
+  --color-warning: #D1B06C;
+  --color-critical: #B33A3A;
+  --color-bg: #F5F7FA;
+  --color-text: #1C2733;
+  --color-text-muted: #5B6B7A;
+  --color-success-tint: rgba(146, 208, 93, 0.12);
+  --color-info-tint: rgba(181, 224, 234, 0.35);
+  --color-warning-tint: rgba(209, 176, 108, 0.15);
+  --color-critical-tint: rgba(179, 58, 58, 0.10);
+  --color-sidebar-border: rgba(181, 224, 234, 0.2);
+  --color-sidebar-foreground: #B5E0EA;
+
+  /* shadcn overrides to match MBG palette */
+  --background: #F5F7FA;
+  --foreground: #1C2733;
+  --card: #FFFFFF;
+  --card-foreground: #1C2733;
+  --popover: #FFFFFF;
+  --popover-foreground: #1C2733;
+  --primary: #071E49;
+  --primary-foreground: #FFFFFF;
+  --secondary: #B5E0EA;
+  --secondary-foreground: #071E49;
+  --muted: #F5F7FA;
+  --muted-foreground: #5B6B7A;
+  --accent: #B5E0EA;
+  --accent-foreground: #071E49;
+  --destructive: #B33A3A;
+  --border: rgba(181, 224, 234, 0.5);
+  --input: rgba(7, 30, 73, 0.14);
+  --ring: #071E49;
+  --chart-1: #071E49;
+  --chart-2: #92D05D;
+  --chart-3: #D1B06C;
+  --chart-4: #B5E0EA;
+  --chart-5: #B33A3A;
+  --sidebar: #071E49;
+  --sidebar-foreground: #B5E0EA;
+  --sidebar-primary: #071E49;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgba(181, 224, 234, 0.14);
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(181, 224, 234, 0.2);
+  --sidebar-ring: #92D05D;
+
+  /* ===== Elderly-friendly typography tokens (§3) ===== */
+  --text-body: 16px;
+  --text-body-strong: 16px;
+  --text-caption: 13px;
+  --text-label: 13px;
+  --text-data: 14px;
+  --text-heading: 20px;
+  --text-section-title: 24px;
+  --text-display-sm: 30px;
+  --text-display-lg: 36px;
+  --text-nav-label: 14px;
+  --text-eyebrow: 11px;
+  --text-button: 14px;
+
+  /* Touch target tokens (§3) */
+  --touch-min: 48px;
+  --touch-gap: 8px;
+
+  /* Icon size tokens */
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-nav: 22px;
+  --icon-nav-mobile: 28px;
+  --icon-action: 20px;
+
+  /* Spacing scale (base 4px, wider for elderly) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+}
+
+/* Admin role — meet §3 minimums (body ≥ 18px) */
+[data-role="admin"] {
+  --text-body: 18px;
+  --text-body-strong: 18px;
+  --text-caption: 14px;
+  --text-label: 14px;
+  --text-data: 15px;
+  --text-heading: 22px;
+  --text-section-title: 26px;
+  --text-display-sm: 32px;
+  --text-display-lg: 40px;
+  --text-nav-label: 14px;
+  --text-eyebrow: 12px;
+  --text-button: 15px;
+}
+
+/* Warga role — ≥ 20px body per §3 */
+[data-role="warga"] {
+  --text-body: 20px;
+  --text-body-strong: 20px;
+  --text-caption: 15px;
+  --text-label: 15px;
+  --text-data: 16px;
+  --text-heading: 24px;
+  --text-section-title: 28px;
+  --text-display-sm: 36px;
+  --text-display-lg: 44px;
+  --text-nav-label: 15px;
+  --text-eyebrow: 12px;
+  --text-button: 16px;
+
+  /* Wider spacing for elderly */
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 20px;
+  --space-5: 24px;
+  --space-6: 28px;
+  --space-8: 36px;
+  --space-10: 44px;
+  --space-12: 52px;
+}
+
+.dark {
+  --background: #0B1726;
+  --foreground: #F5F7FA;
+  --card: #0F2035;
+  --card-foreground: #F5F7FA;
+  --popover: #0F2035;
+  --popover-foreground: #F5F7FA;
+  --primary: #B5E0EA;
+  --primary-foreground: #071E49;
+  --secondary: #152438;
+  --secondary-foreground: #B5E0EA;
+  --muted: #152438;
+  --muted-foreground: #7B8D9E;
+  --accent: #152438;
+  --accent-foreground: #B5E0EA;
+  --destructive: #E05A5A;
+  --border: rgba(181, 224, 234, 0.15);
+  --input: rgba(181, 224, 234, 0.1);
+  --ring: #92D05D;
+  --chart-1: #071E49;
+  --chart-2: #92D05D;
+  --chart-3: #D1B06C;
+  --chart-4: #B5E0EA;
+  --chart-5: #B33A3A;
+  --sidebar: #071E49;
+  --sidebar-foreground: #B5E0EA;
+  --sidebar-primary: #B5E0EA;
+  --sidebar-primary-foreground: #071E49;
+  --sidebar-accent: rgba(181, 224, 234, 0.14);
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(181, 224, 234, 0.2);
+  --sidebar-ring: #92D05D;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: var(--text-body);
+    line-height: 1.55;
+  }
+}
+
+/* Font families */
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+}
+.font-data {
+  font-family: var(--font-ibm-plex-mono), monospace;
+}
+
+/* ===== Typography override: text-[Xpx] → CSS custom properties ===== */
+/* These rules override Tailwind's arbitrary font-size classes to use
+   elderly-friendly CSS custom properties that scale per role. */
+.text-\[10px\] { font-size: var(--text-eyebrow) !important; }
+.text-\[11px\] { font-size: var(--text-caption) !important; }
+.text-\[12px\] { font-size: var(--text-caption) !important; }
+.text-\[13px\] { font-size: var(--text-body) !important; }
+.text-\[14px\] { font-size: var(--text-heading) !important; }
+.text-\[15px\] { font-size: var(--text-heading) !important; }
+.text-\[16px\] { font-size: var(--text-heading) !important; }
+.text-\[18px\] { font-size: var(--text-section-title) !important; }
+.text-\[20px\] { font-size: var(--text-section-title) !important; }
+.text-\[22px\] { font-size: var(--text-display-sm) !important; }
+.text-\[24px\] { font-size: var(--text-display-sm) !important; }
+.text-\[28px\] { font-size: var(--text-display-sm) !important; }
+
+/* Special: font-data + text-[11px] should use data token (monospace data) */
+.font-data.text-\[11px\] { font-size: var(--text-data) !important; }
+.font-data.text-\[12px\] { font-size: var(--text-data) !important; }
+
+/* Custom scrollbar */
+.scroll-thin::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgba(181, 224, 234, 0.5);
+  border-radius: 4px;
+}
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(181, 224, 234, 0.8);
+}
+
+/* Focus ring - MBG/BGN style (2px Hijau Tunas + offset 2px) */
+*:focus-visible {
+  outline: 2px solid #92D05D;
+  outline-offset: 2px;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
