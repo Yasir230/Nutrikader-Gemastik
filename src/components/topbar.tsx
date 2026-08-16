@@ -10,6 +10,7 @@ import { formatTanggal } from "@/lib/mock-data";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { groups } from "@/lib/nav-data";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const sectionTitle: Record<string, { crumb: string; title: string }> = {
   dashboard: { crumb: "Operasional", title: "Dashboard" },
@@ -39,6 +40,7 @@ export function Topbar() {
   const [q, setQ] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [readIds, setReadIds] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
   const meta = sectionTitle[section] ?? sectionTitle.dashboard;
 
@@ -65,7 +67,7 @@ export function Topbar() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  const unreadCount = notifikasiData.filter((n) => !n.dibaca).length;
+  const unreadCount = notifikasiData.filter((n) => !n.dibaca && !readIds.includes(n.id)).length;
 
   if (!user) return null;
 
@@ -303,6 +305,7 @@ export function Topbar() {
             </div>
             <ul className="max-h-80 overflow-y-auto scroll-thin">
               {notifikasiData.map((n) => {
+                const isRead = n.dibaca || readIds.includes(n.id);
                 const toneColor =
                   n.level === "critical" ? "var(--color-critical)" :
                   n.level === "warning" ? "var(--color-warning)" :
@@ -311,7 +314,33 @@ export function Topbar() {
                 return (
                   <li
                     key={n.id}
-                    className="px-3 py-2.5 border-b last:border-b-0 cursor-pointer hover:bg-[var(--color-info-tint)]"
+                    onClick={() => {
+                      setReadIds(prev => [...prev, n.id]);
+                      toggleNotif(false);
+                      toast.info("Membuka: " + n.judul);
+                      
+                      const lower = n.judul.toLowerCase();
+                      if (lower.includes("sinkronisasi mbg")) {
+                        setSection("mbg");
+                      } else if (lower.includes("jadwal posyandu")) {
+                        setSection("jadwal");
+                      } else if (lower.includes("laporan")) {
+                        setSection("laporan");
+                      } else {
+                        let targetId = "B03";
+                        for (const b of balitaData) {
+                          if (n.pesan.includes(b.nama) || n.judul.includes(b.nama)) {
+                            targetId = b.id;
+                            break;
+                          }
+                        }
+                        openBalita(targetId);
+                      }
+                    }}
+                    className={cn(
+                      "px-3 py-2.5 border-b last:border-b-0 cursor-pointer hover:bg-[var(--color-info-tint)] transition-colors",
+                      isRead ? "opacity-70 bg-gray-50/50" : ""
+                    )}
                     style={{ borderColor: "rgba(181,224,234,0.3)" }}
                   >
                     <div className="flex gap-2.5">
@@ -321,7 +350,7 @@ export function Topbar() {
                           <span className="font-semibold truncate" style={{ color: "var(--color-text)", fontSize: "var(--text-caption)" }}>
                             {n.judul}
                           </span>
-                          {!n.dibaca && (
+                          {!isRead && (
                             <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: "var(--color-critical)" }} aria-label="Belum dibaca" />
                           )}
                         </div>

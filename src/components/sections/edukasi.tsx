@@ -30,6 +30,8 @@ import {
   MapPin,
   Clock,
   User,
+  Download,
+  Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -55,6 +57,8 @@ export function EdukasiSection() {
   const [wilayah, setWilayah] = useState<string>("Semua");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<EdukasiModul | null>(null);
+  const [bukaModul, setBukaModul] = useState<EdukasiModul | null>(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const wilayahOptions = useMemo(() => {
     const set = new Set<string>();
@@ -81,11 +85,7 @@ export function EdukasiSection() {
         description="Konten edukasi dan rekomendasi menu berbasis pangan lokal sesuai wilayah pengguna."
         actions={
           <Button
-            onClick={() =>
-              toast.info(
-                "[Demo] Fitur tambah modul akan tersedia untuk peran Petugas Gizi Puskesmas (TPG)."
-              )
-            }
+            onClick={() => setIsAddOpen(true)}
             className="rounded-[8px]"
             style={{
               backgroundColor: "var(--color-primary)",
@@ -170,7 +170,198 @@ export function EdukasiSection() {
         onOpenChange={(open) => !open && setSelected(null)}
       >
         <DialogContent className="sm:max-w-lg">
-          {selected && <EdukasiDetail modul={selected} />}
+          {selected && (
+            <EdukasiDetail
+              modul={selected}
+              onBukaModul={() => {
+                setBukaModul(selected);
+                setSelected(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Buka Modul */}
+      <Dialog
+        open={!!bukaModul}
+        onOpenChange={(open) => !open && setBukaModul(null)}
+      >
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          {bukaModul && (
+            <>
+              <DialogHeader>
+                <DialogTitle
+                  style={{ color: "var(--color-primary)", fontWeight: 500 }}
+                  className="text-xl"
+                >
+                  {bukaModul.judul}
+                </DialogTitle>
+                <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mt-2">
+                  <StatusBadge tone={kategoriTone[bukaModul.kategori]}>
+                    {bukaModul.kategori}
+                  </StatusBadge>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <User className="w-3.5 h-3.5" />
+                    {bukaModul.penulis}
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {bukaModul.durasiBaca} mnt baca
+                  </span>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-5 py-4">
+                <div className="space-y-2">
+                  <h4
+                    className="font-medium text-[15px]"
+                    style={{ color: "var(--color-primary)" }}
+                  >
+                    Ringkasan Materi & Manfaat Pangan Lokal
+                  </h4>
+                  <p className="text-[13.5px] leading-relaxed text-gray-600">
+                    {bukaModul.ringkasan} Pangan lokal ini sangat bermanfaat untuk
+                    memenuhi kebutuhan gizi harian anak dan keluarga, mendukung
+                    pertumbuhan, serta mencegah stunting secara efektif karena mudah
+                    didapatkan di lingkungan sekitar dengan harga terjangkau.
+                  </p>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <h4
+                    className="font-medium text-[15px]"
+                    style={{ color: "var(--color-primary)" }}
+                  >
+                    Resep & Takaran Gizi (Per Porsi)
+                  </h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="p-3 border rounded-[8px] text-center bg-gray-50">
+                      <div className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">
+                        Kalori
+                      </div>
+                      <div className="font-medium text-gray-900">250 kcal</div>
+                    </div>
+                    <div className="p-3 border rounded-[8px] text-center bg-gray-50">
+                      <div className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">
+                        Protein
+                      </div>
+                      <div className="font-medium text-gray-900">12 g</div>
+                    </div>
+                    <div className="p-3 border rounded-[8px] text-center bg-gray-50">
+                      <div className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">
+                        Zat Besi
+                      </div>
+                      <div className="font-medium text-gray-900">4.5 mg</div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <h4
+                    className="font-medium text-[15px]"
+                    style={{ color: "var(--color-primary)" }}
+                  >
+                    Langkah Pembuatan Makanan Bergizi
+                  </h4>
+                  <ol className="list-decimal pl-4 text-[13.5px] text-gray-600 space-y-2">
+                    <li>
+                      Cuci bersih semua bahan utama (
+                      {bukaModul.bahanUtama.join(", ")}).
+                    </li>
+                    <li>
+                      Siapkan bumbu halus dan tumis dengan sedikit minyak hingga harum.
+                    </li>
+                    <li>
+                      Masukkan bahan utama, tambahkan air secukupnya, dan masak hingga
+                      tekstur sesuai untuk anak/balita.
+                    </li>
+                    <li>
+                      Sajikan selagi hangat untuk mempertahankan nilai gizi optimal dan
+                      meningkatkan selera makan.
+                    </li>
+                  </ol>
+                </div>
+              </div>
+
+              <DialogFooter className="gap-2 sm:gap-0 mt-2">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 rounded-[8px]"
+                  onClick={() => toast.success("Panduan PDF sedang diunduh...")}
+                >
+                  <Download className="w-4 h-4" />
+                  Unduh Panduan PDF
+                </Button>
+                <Button
+                  className="flex items-center gap-2 rounded-[8px]"
+                  onClick={() => toast.success("Membuka WhatsApp...")}
+                  style={{ backgroundColor: "#25D366", color: "white" }}
+                >
+                  <Share2 className="w-4 h-4" />
+                  Bagikan Edukasi
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Tambah Modul */}
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tambah Modul Edukasi</DialogTitle>
+            <DialogDescription>
+              Buat modul edukasi berbasis pangan lokal baru.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Judul Modul</label>
+              <Input placeholder="Masukkan judul modul" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Kategori</label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih Kategori" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MPASI">MPASI</SelectItem>
+                  <SelectItem value="Pangan Lokal">Pangan Lokal</SelectItem>
+                  <SelectItem value="Gizi Seimbang">Gizi Seimbang</SelectItem>
+                  <SelectItem value="Pencegahan Stunting">
+                    Pencegahan Stunting
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Bahan (pisahkan dengan koma)</label>
+              <Input placeholder="Contoh: Ikan Lele, Daun Kelor" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsAddOpen(false)}>
+              Batal
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success("Modul berhasil ditambahkan!");
+                setIsAddOpen(false);
+              }}
+              style={{ backgroundColor: "var(--color-primary)", color: "#FFFFFF" }}
+            >
+              Simpan
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
@@ -316,7 +507,13 @@ function EdukasiCard({
 // ------------------------------------------------------------
 // EdukasiDetail (Dialog content)
 // ------------------------------------------------------------
-function EdukasiDetail({ modul }: { modul: EdukasiModul }) {
+function EdukasiDetail({
+  modul,
+  onBukaModul,
+}: {
+  modul: EdukasiModul;
+  onBukaModul: () => void;
+}) {
   const isAllWilayah = modul.wilayah === "Semua";
   return (
     <>
@@ -396,7 +593,7 @@ function EdukasiDetail({ modul }: { modul: EdukasiModul }) {
       <DialogFooter>
         <Button
           variant="ghost"
-          onClick={() => toast.info(`[Demo] Membuka modul edukasi: ${modul.judul}`)}
+          onClick={onBukaModul}
           className="rounded-[8px] border"
           style={{
             borderColor: "rgba(7,30,73,0.12)",

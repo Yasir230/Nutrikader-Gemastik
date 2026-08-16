@@ -161,5 +161,7 @@ export interface Notifikasi {
   pesan: string;
   waktu: string;
   dibaca: boolean;
+  isRead: boolean;
   level: "info" | "success" | "warning" | "critical";
 }
+

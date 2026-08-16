@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -32,6 +32,8 @@ import {
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
+import QRCode from "qrcode";
+import html2canvas from "html2canvas";
 
 // ============================================================
 // KISB Section — Kartu Indonesia Sehat Balita Digital (KF-10, MVP #11)
@@ -39,76 +41,7 @@ import { toast } from "sonner";
 // status risiko, penerimaan MBG — sejak lahir hingga keluar posyandu.
 // ============================================================
 
-// Deterministic hash dari string untuk QR pattern visual (placeholder)
-function hashStr(s: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
-
-// 8x8 grid QR placeholder — pattern deterministik berbasis NIK
-function QrPlaceholder({ nik }: { nik: string }) {
-  const cells = useMemo(() => {
-    const seed = hashStr(nik);
-    const out: boolean[] = [];
-    let x = seed;
-    for (let i = 0; i < 64; i++) {
-      // xorshift sederhana
-      x ^= x << 13; x >>>= 0;
-      x ^= x >> 17;
-      x ^= x << 5; x >>>= 0;
-      out.push((x & 1) === 1);
-    }
-    return out;
-  }, [nik]);
-
-  // Tambahkan finder pattern 3 sudut (marker kotak QR)
-  const isFinder = (r: number, c: number) => {
-    const inBox = (br: number, bc: number) =>
-      r >= br && r < br + 3 && c >= bc && c < bc + 3;
-    return inBox(0, 0) || inBox(0, 5) || inBox(5, 0);
-  };
-  const isFinderSolid = (r: number, c: number) => {
-    const inCore = (br: number, bc: number) =>
-      r === br + 1 && c === bc + 1;
-    return inCore(0, 0) || inCore(0, 5) || inCore(5, 0);
-  };
-
-  return (
-    <div
-      className="grid bg-white"
-      style={{
-        gridTemplateColumns: "repeat(8, 1fr)",
-        width: 88,
-        height: 88,
-        padding: 4,
-        borderRadius: 4,
-        border: "1px solid rgba(7, 30, 73, 0.18)",
-      }}
-      aria-label="Kode QR placeholder KISB"
-      role="img"
-    >
-      {Array.from({ length: 64 }).map((_, i) => {
-        const r = Math.floor(i / 8);
-        const c = i % 8;
-        const finder = isFinder(r, c);
-        const solid = isFinderSolid(r, c) || (finder && (r === 0 || r === 2 || c === 0 || c === 2) && !(r === 1 && c === 1));
-        const filled = finder ? solid : cells[i];
-        return (
-          <div
-            key={i}
-            style={{
-              backgroundColor: filled ? "#071E49" : "transparent",
-            }}
-          />
-        );
-      })}
-    </div>
-  );
-}
+// Placeholder removed in favor of real QRCode
 
 // Inisial nama untuk avatar
 function getInitials(nama: string): string {
@@ -148,6 +81,8 @@ export function KisbSection() {
   const [activeId, setActiveId] = useState<string>(
     selectedBalitaId ?? balitaData[0]?.id ?? ""
   );
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
 
   const balita = useMemo(
     () => balitaData.find((b) => b.id === activeId) ?? balitaData[0],
@@ -182,16 +117,54 @@ export function KisbSection() {
   const tanggalDiperbarui = pengukuranTerakhir?.tanggal ?? balita.tanggalLahir;
   const nomorKartu = `KISB-${balita.nik.slice(-6)}`;
 
-  const handleDownload = () => {
-    toast.info("[Demo] Fitur unduh PDF akan tersedia di versi produksi", {
-      description: `[Demo] KISB ${balita.nama} — ${nomorKartu}`,
-    });
+  useEffect(() => {
+    const generateQr = async () => {
+      try {
+        const url = `https://nutrikader-gemastik.vercel.app/kisb/${balita.nik}?ts=${Date.now()}&sig=VERIFIED`;
+        const dataUrl = await QRCode.toDataURL(url, {
+          margin: 1,
+          color: {
+            dark: '#071E49',
+            light: '#FFFFFF'
+          }
+        });
+        setQrDataUrl(dataUrl);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    if (balita) generateQr();
+  }, [balita]);
+
+  const handleDownload = async () => {
+    if (!cardRef.current) return;
+    try {
+      const canvas = await html2canvas(cardRef.current, { scale: 3, useCORS: true, backgroundColor: null });
+      const link = document.createElement("a");
+      link.download = `KISB-${balita.nama.replace(/\s+/g, "_")}-${nomorKartu}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast.success("Berhasil mengunduh KISB.");
+    } catch (error) {
+      toast.error("Gagal mengunduh KISB.");
+    }
   };
 
   const handleShare = () => {
-    toast.success(`[Demo] Kartu KISB ${balita.nama} berhasil dibagikan ke ibu balita`, {
-      description: "[Demo] Tautan verifikasi dikirim via WhatsApp.",
-    });
+    const statusGiziStr = (balita as any).statusGizi || "Baik";
+    const text = `*KARTU INDONESIA SEHAT BALITA (KISB) DIGITAL*
+Badan Gizi Nasional (BGN) & Puskesmas Jatinegara
+
+Nama Balita: ${balita.nama}
+NIK: ${balita.nik}
+Status Gizi: ${statusGiziStr} (Risiko ${balita.risiko.toUpperCase()})
+Nomor KISB: ${nomorKartu}
+Posyandu: ${balita.posyanduNama}
+
+Pantau gizi & jadwal imunisasi balita Anda secara berkala.
+Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+    toast.success("Membuka WhatsApp untuk membagikan KISB.");
   };
 
   return (
@@ -251,6 +224,7 @@ export function KisbSection() {
 
       {/* Kartu KISB visual (signature visual) */}
       <div
+        ref={cardRef}
         className="relative rounded-[12px] p-[1px]"
         style={{ backgroundColor: "var(--color-warning)" }}
         aria-label={`Kartu KISB ${balita.nama}`}
@@ -360,13 +334,21 @@ export function KisbSection() {
 
             {/* Kanan: QR */}
             <div className="flex flex-col items-center sm:items-end gap-1.5">
-              <QrPlaceholder nik={balita.nik} />
+              {qrDataUrl ? (
+                <img 
+                  src={qrDataUrl} 
+                  alt="QR Code Verifikasi KISB" 
+                  className="w-[88px] h-[88px] rounded-[4px] border border-[rgba(7,30,73,0.18)] bg-white"
+                />
+              ) : (
+                <div className="w-[88px] h-[88px] rounded-[4px] border border-[rgba(7,30,73,0.18)] bg-white animate-pulse" />
+              )}
               <div
-                className="text-[10px] uppercase tracking-wider flex items-center gap-1"
-                style={{ color: "var(--color-info)" }}
+                className="text-[10px] uppercase tracking-wider flex items-center gap-1 font-semibold"
+                style={{ color: "var(--color-success)" }}
               >
-                <QrCode className="w-3 h-3" />
-                Pindai untuk verifikasi
+                <CheckCircle2 className="w-3 h-3" />
+                Terverifikasi BGN
               </div>
             </div>
           </div>

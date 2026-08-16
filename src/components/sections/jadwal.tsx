@@ -5,6 +5,14 @@ import { SectionHeader, FlatCard } from "@/components/section";
 import { KpiCard } from "@/components/kpi-card";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useNav } from "@/lib/nav-store";
 import { jadwalData, formatTanggal, formatTanggalPanjang } from "@/lib/mock-data";
 import type { JadwalPosyandu } from "@/lib/types";
@@ -77,11 +85,10 @@ function JadwalItem({ j }: { j: JadwalPosyandu }) {
       ? "var(--color-warning-tint)"
       : "var(--color-info-tint)";
   const kaderList = j.kaderBertugas;
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
 
   const handlePing = () => {
-    toast.success(`[Demo] Pengingat dikirim ke ${kaderList.join(", ")}`, {
-      description: `${j.posyanduNama} · ${formatTanggal(j.tanggal)} ${j.jam}`,
-    });
+    setIsReminderOpen(true);
   };
 
   const handleDetail = () => {
@@ -216,6 +223,51 @@ function JadwalItem({ j }: { j: JadwalPosyandu }) {
           <ArrowRight className="w-3.5 h-3.5" />
         </Button>
       </div>
+
+      <Dialog open={isReminderOpen} onOpenChange={setIsReminderOpen}>
+        <DialogContent className="max-w-md w-[90vw] rounded-[12px]">
+          <DialogHeader>
+            <DialogTitle>Kirim Pengingat: {j.posyanduNama}</DialogTitle>
+            <DialogDescription>
+              Pilih penerima pengingat via WhatsApp untuk jadwal tanggal {formatTanggal(j.tanggal)} jam {j.jam}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <h4 className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>Kader Bertugas</h4>
+              <ul className="text-sm space-y-1">
+                {kaderList.map((k) => (
+                  <li key={k} className="flex justify-between items-center border-b pb-2" style={{ borderColor: "rgba(7,30,73,0.06)" }}>
+                    <span style={{ color: "var(--color-text)" }}>{k}</span>
+                    <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>+628123456789</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="space-y-2">
+               <h4 className="text-sm font-semibold mt-2" style={{ color: "var(--color-text)" }}>Orang Tua/Peserta (Contoh)</h4>
+               <ul className="text-sm space-y-1">
+                   <li className="flex justify-between items-center border-b pb-2" style={{ borderColor: "rgba(7,30,73,0.06)" }}>
+                     <span style={{ color: "var(--color-text)" }}>Ibu Siti (Anak: Budi)</span>
+                     <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>+628987654321</span>
+                   </li>
+                   <li className="flex justify-between items-center border-b pb-2" style={{ borderColor: "rgba(7,30,73,0.06)" }}>
+                     <span style={{ color: "var(--color-text)" }}>Ibu Rahma (Anak: Ani)</span>
+                     <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>+628112233445</span>
+                   </li>
+               </ul>
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsReminderOpen(false)}>Batal</Button>
+            <Button asChild>
+              <a href={`https://wa.me/?text=${encodeURIComponent(`Halo, ini pengingat jadwal posyandu di ${j.posyanduNama} pada tanggal ${formatTanggal(j.tanggal)} jam ${j.jam}. Mohon kehadirannya tepat waktu!`)}`} target="_blank" rel="noreferrer">
+                Kirim Pengingat WhatsApp
+              </a>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </li>
   );
 }

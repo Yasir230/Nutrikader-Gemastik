@@ -307,11 +307,11 @@ export const laporanData: LaporanBulanan[] = [
 ];
 
 export const notifikasiData: Notifikasi[] = [
-  { id: "N01", tipe: "risiko", judul: "Balita baru naik ke risiko tinggi", pesan: "Kenzo Arvian Mahesa (Posyandu Flamboyan) terdeteksi berat badan turun 2 bulan berturut.", waktu: "10 menit lalu", dibaca: false, level: "critical" },
-  { id: "N02", tipe: "mbg", judul: "Sinkronisasi MBG tertunda", pesan: "5 data penerimaan MBG dari Posyandu Flamboyan belum tersinkron ke server BGN.", waktu: "35 menit lalu", dibaca: false, level: "warning" },
-  { id: "N03", tipe: "pengingat", judul: "Jadwal posyandu hari ini", pesan: "2 posyandu (Flamboyan & Mawar I) menyelenggarakan pencatatan rutin hari ini.", waktu: "2 jam lalu", dibaca: false, level: "info" },
-  { id: "N04", tipe: "sistem", judul: "Laporan Januari 2026 siap diunduh", pesan: "6 dari 8 posyandu telah melengkapi laporan bulanan.", waktu: "5 jam lalu", dibaca: true, level: "success" },
-  { id: "N05", tipe: "risiko", judul: "Rujukan baru memerlukan tindak lanjut", pesan: "Khalisa Nayla Azzahra dirujuk ke puskesmas, menunggu konfirmasi TPG.", waktu: "1 hari lalu", dibaca: true, level: "warning" },
+  { id: "N01", tipe: "risiko", judul: "Balita baru naik ke risiko tinggi", pesan: "Kenzo Arvian Mahesa (Posyandu Flamboyan) terdeteksi berat badan turun 2 bulan berturut.", waktu: "10 menit lalu", dibaca: false, isRead: false, level: "critical" },
+  { id: "N02", tipe: "mbg", judul: "Sinkronisasi MBG tertunda", pesan: "5 data penerimaan MBG dari Posyandu Flamboyan belum tersinkron ke server BGN.", waktu: "35 menit lalu", dibaca: false, isRead: false, level: "warning" },
+  { id: "N03", tipe: "pengingat", judul: "Jadwal posyandu hari ini", pesan: "2 posyandu (Flamboyan & Mawar I) menyelenggarakan pencatatan rutin hari ini.", waktu: "2 jam lalu", dibaca: false, isRead: false, level: "info" },
+  { id: "N04", tipe: "sistem", judul: "Laporan Januari 2026 siap diunduh", pesan: "6 dari 8 posyandu telah melengkapi laporan bulanan.", waktu: "5 jam lalu", dibaca: true, isRead: true, level: "success" },
+  { id: "N05", tipe: "risiko", judul: "Rujukan baru memerlukan tindak lanjut", pesan: "Khalisa Nayla Azzahra dirujuk ke puskesmas, menunggu konfirmasi TPG.", waktu: "1 hari lalu", dibaca: true, isRead: true, level: "warning" },
 ];
 
 // ============================================================
