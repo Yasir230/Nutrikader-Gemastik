@@ -123,7 +123,7 @@ export function DetailBalitaSection() {
         backgroundColor: '#FFFFFF',
         scale: 2,
         useCORS: true,
-      });
+      } as any);
       const link = document.createElement('a');
       link.download = `grafik-pertumbuhan-${balita.nama.replace(/\s+/g, '-').toLowerCase()}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -354,7 +354,7 @@ export function DetailBalitaSection() {
                 aria-hidden
               />
               <span
-                className="text-[12px] font-medium"
+                className="whitespace-nowrap text-[12px] font-medium"
                 style={{ color: "var(--color-text)" }}
               >
                 Berat Badan (kg)
@@ -419,7 +419,7 @@ export function DetailBalitaSection() {
                 aria-hidden
               />
               <span
-                className="text-[12px] font-medium"
+                className="whitespace-nowrap text-[12px] font-medium"
                 style={{ color: "var(--color-text)" }}
               >
                 Tinggi Badan (cm)
@@ -651,31 +651,31 @@ export function DetailBalitaSection() {
                   borderColor: "rgba(181,224,234,0.5)",
                 }}
               >
-                <th className="font-medium text-[11px] uppercase tracking-wide py-2.5 px-4">
+                <th className="whitespace-nowrap font-medium text-[11px] uppercase tracking-wide py-2.5 px-4">
                   Tanggal
                 </th>
-                <th className="font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
+                <th className="whitespace-nowrap font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
                   Usia (bln)
                 </th>
-                <th className="font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
+                <th className="whitespace-nowrap font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
                   BB (kg)
                 </th>
-                <th className="font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
+                <th className="whitespace-nowrap font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
                   TB (cm)
                 </th>
-                <th className="font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
+                <th className="whitespace-nowrap font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
                   LK (cm)
                 </th>
-                <th className="font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
+                <th className="whitespace-nowrap font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
                   Z-score BB/U
                 </th>
-                <th className="font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
+                <th className="whitespace-nowrap font-medium text-[11px] uppercase tracking-wide py-2.5 px-3 text-right">
                   Z-score TB/U
                 </th>
-                <th className="font-medium text-[11px] uppercase tracking-wide py-2.5 px-3">
+                <th className="whitespace-nowrap font-medium text-[11px] uppercase tracking-wide py-2.5 px-3">
                   Sakit
                 </th>
-                <th className="font-medium text-[11px] uppercase tracking-wide py-2.5 px-4">
+                <th className="whitespace-nowrap font-medium text-[11px] uppercase tracking-wide py-2.5 px-4">
                   Catatan
                 </th>
               </tr>

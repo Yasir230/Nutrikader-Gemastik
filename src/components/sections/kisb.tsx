@@ -30,6 +30,11 @@ import {
   Ruler,
   CheckCircle2,
   Clock,
+  User,
+  Calendar,
+  Users,
+  ShieldCheck,
+  UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "qrcode";
@@ -143,55 +148,15 @@ export function KisbSection() {
     if (!cardRef.current) return;
     setDownloading(true);
     try {
-      const scale = 2;
-      const bgColor = '#071E49';
-      let canvas: HTMLCanvasElement;
-      
-      try {
-        canvas = await html2canvas(cardRef.current, { 
-          scale, 
-          useCORS: true, 
-          allowTaint: true,
-          backgroundColor: bgColor, 
-          logging: false,
-          scrollX: 0, 
-          scrollY: 0
-        });
-      } catch (err) {
-        console.warn("html2canvas failed, using fallback:", err);
-        // Fallback canvas drawing
-        canvas = document.createElement("canvas");
-        const rect = cardRef.current.getBoundingClientRect();
-        canvas.width = rect.width * scale;
-        canvas.height = rect.height * scale;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.scale(scale, scale);
-          ctx.fillStyle = bgColor;
-          ctx.fillRect(0, 0, rect.width, rect.height);
-          
-          ctx.fillStyle = "#FFFFFF";
-          ctx.font = "20px sans-serif";
-          ctx.fillText("KARTU INDONESIA SEHAT BALITA", 20, 40);
-          ctx.font = "14px sans-serif";
-          ctx.fillText(`Nama: ${balita.nama}`, 20, 80);
-          ctx.fillText(`NIK: ${balita.nik}`, 20, 100);
-          ctx.fillText(`No. Kartu: ${nomorKartu}`, 20, 120);
-          
-          if (qrDataUrl) {
-            const qrImg = new Image();
-            qrImg.src = qrDataUrl;
-            await new Promise((resolve) => {
-              qrImg.onload = () => {
-                ctx.drawImage(qrImg, rect.width - 120, 20, 100, 100);
-                resolve(null);
-              };
-              qrImg.onerror = resolve;
-            });
-          }
-        }
-      }
-
+      const canvas = await html2canvas(cardRef.current, { 
+        scale: 3, 
+        useCORS: true, 
+        allowTaint: true,
+        backgroundColor: '#041533', 
+        logging: false,
+        scrollX: 0, 
+        scrollY: 0
+      } as any);
       const link = document.createElement("a");
       link.download = `KISB-${balita.nama.replace(/\s+/g, "_")}-${nomorKartu}.png`;
       link.href = canvas.toDataURL("image/png");
@@ -284,188 +249,128 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
       {/* Kartu KISB visual (signature visual) */}
       <div
         ref={cardRef}
-        className="relative rounded-[12px] p-[1px]"
-        style={{ backgroundColor: "var(--color-warning)" }}
+        className="relative bg-[#041533] border border-emerald-500/30 rounded-2xl shadow-xl overflow-hidden p-5 sm:p-7"
         aria-label={`Kartu KISB ${balita.nama}`}
       >
-        <div
-          className="rounded-[11px] p-5 sm:p-7"
-          style={{
-            backgroundColor: "var(--color-primary)",
-            color: "#FFFFFF",
-          }}
-        >
-          {/* Header kartu */}
-          <div className="flex items-start justify-between gap-3 pb-4"
-            style={{ borderBottom: "1px solid rgba(181, 224, 234, 0.22)" }}
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div
-                className="flex items-center justify-center shrink-0"
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 9999,
-                  backgroundColor: "var(--color-success)",
-                  color: "var(--color-primary)",
-                }}
-                aria-hidden
-              >
-                <HeartPulse className="w-5 h-5" />
-              </div>
-              <div className="min-w-0" style={{ lineHeight: 1.3, paddingTop: "4px", overflow: "visible" }}>
-                <div
-                  className="font-display text-[16px] sm:text-[18px]"
-                  style={{ fontWeight: 500, color: "#FFFFFF", lineHeight: 1.3, overflow: "visible" }}
-                >
-                  KARTU INDONESIA SEHAT BALITA
-                </div>
-                <div
-                  className="text-[11px] sm:text-[12px] mt-0.5"
-                  style={{ color: "var(--color-info)", lineHeight: 1.3 }}
-                >
-                  NutriKader · Badan Gizi Nasional
-                </div>
-              </div>
+        {/* Header Row */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-full bg-[var(--color-success)] text-[#071E49] flex items-center justify-center shrink-0">
+              <HeartPulse className="w-5 h-5" />
             </div>
-            <div className="text-right shrink-0">
-              <div
-                className="text-[10px] uppercase tracking-wider"
-                style={{ color: "var(--color-info)" }}
-              >
-                No. Kartu
+            <div className="min-w-0 flex flex-col justify-center">
+              <div className="font-display font-bold text-[18px] sm:text-[20px] text-white tracking-wide leading-tight">
+                KARTU INDONESIA SEHAT BALITA
               </div>
-              <div
-                className="font-data text-[13px] sm:text-[14px]"
-                style={{ color: "#FFFFFF" }}
-              >
-                {nomorKartu}
+              <div className="mt-0.5 leading-tight">
+                <span className="text-[var(--color-success)] text-[12px] font-medium">NutriKader</span>
+                <span className="text-cyan-200/80 text-[12px]"> · Badan Gizi Nasional</span>
               </div>
             </div>
           </div>
+          <div className="text-right shrink-0 flex flex-col justify-center">
+            <div className="text-[11px] font-semibold text-[var(--color-success)] tracking-wider uppercase">
+              No. Kartu
+            </div>
+            <div className="text-[16px] sm:text-[18px] font-bold text-white font-mono leading-tight">
+              {nomorKartu}
+            </div>
+          </div>
+        </div>
 
-          {/* Body kartu */}
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 sm:gap-6 py-5">
-            {/* Kiri: identitas */}
-            <div className="flex items-start gap-3 min-w-0">
-              <div
-                className="flex items-center justify-center font-display shrink-0"
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 9999,
-                  backgroundColor: "var(--color-success)",
-                  color: "var(--color-primary)",
-                  fontSize: 20,
-                  fontWeight: 500,
-                }}
-                aria-hidden
-              >
+        <div className="border-b border-cyan-500/20 my-4"></div>
+
+        {/* Body Grid */}
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-0">
+          {/* Left Column */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-14 h-14 rounded-full bg-[var(--color-success)] text-[#071E49] font-bold text-xl flex items-center justify-center shrink-0">
                 {getInitials(balita.nama)}
               </div>
-              <div className="min-w-0 space-y-1.5">
-                <div
-                  className="font-display text-[20px]"
-                  style={{ fontWeight: 500, color: "#FFFFFF", lineHeight: 1.3, paddingTop: "4px", overflow: "visible" }}
-                >
-                  {balita.nama}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-white/90 text-[12px] sm:text-[13px] pt-1">
-                  <div><span className="text-white/60 text-xs block">NIK</span><span className="font-mono font-medium text-white">{balita.nik}</span></div>
-                  <div><span className="text-white/60 text-xs block">Tanggal Lahir</span><span className="font-medium text-white">{formatTanggal(balita.tanggalLahir)}</span></div>
-                  <div><span className="text-white/60 text-xs block">Jenis Kelamin</span><span className="font-medium text-white">{jenisKelaminLabel(balita.jenisKelamin)}</span></div>
-                  <div><span className="text-white/60 text-xs block">Posyandu</span><span className="font-medium text-white truncate block">{balita.posyanduNama}</span></div>
-                </div>
+              <div className="font-display text-[22px] sm:text-[24px] font-bold text-white leading-tight truncate">
+                {balita.nama}
               </div>
             </div>
 
-            {/* Kanan: QR */}
-            <div className="flex flex-col items-center sm:items-end gap-2">
-              {qrDataUrl ? (
-                <img 
-                  src={qrDataUrl} 
-                  alt="QR Code Verifikasi KISB" 
-                  className="w-32 h-32 sm:w-36 sm:h-36 p-2 bg-white rounded-lg border border-[rgba(7,30,73,0.18)]"
-                />
-              ) : (
-                <div className="w-32 h-32 sm:w-36 sm:h-36 p-2 bg-white rounded-lg border border-[rgba(7,30,73,0.18)] animate-pulse" />
-              )}
-              <div
-                className="text-[10px] uppercase tracking-wider flex items-center gap-1 font-semibold mt-1 bg-white/10 px-2 py-1 rounded"
-                style={{ color: "var(--color-success)" }}
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                VERIFIKASI RESMI BGN
+            <div className="space-y-0">
+              <div className="border-b border-white/10 py-2.5 flex items-center justify-between">
+                <div className="text-[var(--color-success)] font-medium text-sm flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  NIK
+                </div>
+                <div className="text-white font-mono font-bold text-[15px]">
+                  {balita.nik}
+                </div>
+              </div>
+              <div className="border-b border-white/10 py-2.5 flex items-center justify-between">
+                <div className="text-[var(--color-success)] font-medium text-sm flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Tgl. Lahir
+                </div>
+                <div className="text-white font-medium text-[15px]">
+                  {formatTanggal(balita.tanggalLahir)}
+                </div>
+              </div>
+              <div className="border-b border-white/10 py-2.5 flex items-center justify-between">
+                <div className="text-[var(--color-success)] font-medium text-sm flex items-center gap-2">
+                  <UserCheck className="w-4 h-4" />
+                  Jenis Kelamin
+                </div>
+                <div className="text-white font-medium text-[15px]">
+                  {jenisKelaminLabel(balita.jenisKelamin)}
+                </div>
+              </div>
+              <div className="border-b border-white/10 py-2.5 flex items-center justify-between">
+                <div className="text-[var(--color-success)] font-medium text-sm flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Posyandu
+                </div>
+                <div className="text-white font-medium text-[15px] truncate max-w-[200px] text-right">
+                  {balita.posyanduNama}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Footer kartu — status strip */}
-          <div
-            className="flex flex-wrap items-center gap-2 sm:gap-3 pt-4"
-            style={{ borderTop: "1px solid rgba(181, 224, 234, 0.22)" }}
-          >
-            {/* RiskBadge versi on-dark */}
-            <span
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[12px] font-medium rounded-[4px] border"
-              style={{
-                backgroundColor:
-                  balita.risiko === "tinggi"
-                    ? "rgba(179, 58, 58, 0.32)"
-                    : balita.risiko === "sedang"
-                    ? "rgba(209, 176, 108, 0.28)"
-                    : "rgba(146, 208, 93, 0.28)",
-                color: "#FFFFFF",
-                borderColor:
-                  balita.risiko === "tinggi"
-                    ? "rgba(179, 58, 58, 0.6)"
-                    : balita.risiko === "sedang"
-                    ? "rgba(209, 176, 108, 0.55)"
-                    : "rgba(146, 208, 93, 0.55)",
-              }}
-            >
-              <span
-                className="inline-block w-1.5 h-1.5 rounded-full"
-                style={{
-                  backgroundColor:
-                    balita.risiko === "tinggi"
-                      ? "#FFFFFF"
-                      : balita.risiko === "sedang"
-                      ? "var(--color-warning)"
-                      : "var(--color-success)",
-                }}
-                aria-hidden
-              />
-              {balita.risiko === "tinggi"
-                ? "Risiko Tinggi"
-                : balita.risiko === "sedang"
-                ? "Risiko Sedang"
-                : "Risiko Rendah"}
-            </span>
+          {/* Vertical Divider */}
+          <div className="hidden sm:block w-[1px] bg-cyan-500/20 mx-4 self-stretch"></div>
 
-            <span
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[12px] font-medium rounded-[4px] border"
-              style={{
-                backgroundColor: "rgba(181, 224, 234, 0.14)",
-                color: "#FFFFFF",
-                borderColor: "rgba(181, 224, 234, 0.4)",
-              }}
-            >
-              <span
-                className="inline-block w-1.5 h-1.5 rounded-full"
-                style={{ backgroundColor: "var(--color-info)" }}
-                aria-hidden
-              />
+          {/* Right Column (QR Verification Hub) */}
+          <div className="flex flex-col items-center justify-center sm:w-[200px] shrink-0 mt-4 sm:mt-0">
+            <div className="p-2 bg-white rounded-2xl border-2 border-[var(--color-success)] shadow-md inline-block">
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt="QR Code Verifikasi KISB"
+                  className="w-36 h-36 sm:w-40 sm:h-40 block object-contain"
+                />
+              ) : (
+                <div className="w-36 h-36 sm:w-40 sm:h-40 bg-gray-100 animate-pulse rounded-xl" />
+              )}
+            </div>
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-[var(--color-success)] tracking-wider mt-2.5">
+              <ShieldCheck className="w-4 h-4" />
+              TERVERIFIKASI BGN
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Row */}
+        <div className="border-t border-cyan-500/20 mt-4 pt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="bg-emerald-950/60 border border-emerald-500/50 text-emerald-300 font-semibold px-3 py-1 rounded-lg text-xs flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              {balita.risiko === "tinggi" ? "Risiko Tinggi" : balita.risiko === "sedang" ? "Risiko Sedang" : "Risiko Rendah"}
+            </div>
+            <div className="bg-blue-950/60 border border-blue-500/50 text-blue-300 font-semibold px-3 py-1 rounded-lg text-xs flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
               {balita.statusPosyandu === "aktif" ? "Aktif Posyandu" : "Lulus Posyandu"}
-            </span>
-
-            <span
-              className="ml-auto text-[11px] sm:text-[12px] flex items-center gap-1.5"
-              style={{ color: "var(--color-info)" }}
-            >
-              <Clock className="w-3.5 h-3.5" />
-              Diperbarui: <span className="font-data" style={{ color: "#FFFFFF" }}>{formatTanggal(tanggalDiperbarui)}</span>
-            </span>
+            </div>
+          </div>
+          <div className="text-xs text-cyan-200/80 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5" />
+            Diperbarui: {formatTanggal(tanggalDiperbarui)}
           </div>
         </div>
       </div>
@@ -491,27 +396,27 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
               <div className="text-[11px] mb-3" style={{ color: "var(--color-text-muted)" }}>
                 Pengukuran {formatTanggal(pengukuranTerakhir.tanggal)} · Usia {pengukuranTerakhir.usiaBulan} bulan
               </div>
-              <dl className="grid grid-cols-2 gap-y-2.5 gap-x-3 text-[13px]">
-                <dt style={{ color: "var(--color-text-muted)" }}>Berat Badan</dt>
+              <dl className="grid grid-cols-[1fr_auto] gap-y-2.5 gap-x-4 text-[13px]">
+                <dt className="whitespace-nowrap shrink-0 text-left" style={{ color: "var(--color-text-muted)" }}>Berat Badan</dt>
                 <dd className="text-right font-data" style={{ color: "var(--color-text)" }}>
                   {pengukuranTerakhir.beratBadan.toLocaleString("id-ID")} kg
                 </dd>
-                <dt style={{ color: "var(--color-text-muted)" }}>Tinggi Badan</dt>
+                <dt className="whitespace-nowrap shrink-0 text-left" style={{ color: "var(--color-text-muted)" }}>Tinggi Badan</dt>
                 <dd className="text-right font-data" style={{ color: "var(--color-text)" }}>
                   {pengukuranTerakhir.tinggiBadan.toLocaleString("id-ID")} cm
                 </dd>
-                <dt style={{ color: "var(--color-text-muted)" }}>Lingkar Kepala</dt>
+                <dt className="whitespace-nowrap shrink-0 text-left" style={{ color: "var(--color-text-muted)" }}>Lingkar Kepala</dt>
                 <dd className="text-right font-data" style={{ color: "var(--color-text)" }}>
                   {pengukuranTerakhir.lingkarKepala.toLocaleString("id-ID")} cm
                 </dd>
-                <dt style={{ color: "var(--color-text-muted)" }}>Z-score BB/U</dt>
+                <dt className="whitespace-nowrap shrink-0 text-left" style={{ color: "var(--color-text-muted)" }}>Z-score BB/U</dt>
                 <dd className="text-right font-data" style={{
                   color: pengukuranTerakhir.zScoreBBU < -2 ? "var(--color-critical)" :
                          pengukuranTerakhir.zScoreBBU < -1 ? "#6b4f1a" : "#3a6b1a"
                 }}>
                   {pengukuranTerakhir.zScoreBBU > 0 ? "+" : ""}{pengukuranTerakhir.zScoreBBU.toFixed(2)}
                 </dd>
-                <dt style={{ color: "var(--color-text-muted)" }}>Z-score TB/U</dt>
+                <dt className="whitespace-nowrap shrink-0 text-left" style={{ color: "var(--color-text-muted)" }}>Z-score TB/U</dt>
                 <dd className="text-right font-data" style={{
                   color: pengukuranTerakhir.zScoreTBU < -2 ? "var(--color-critical)" :
                          pengukuranTerakhir.zScoreTBU < -1 ? "#6b4f1a" : "#3a6b1a"

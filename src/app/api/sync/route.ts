@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import {
   createBalita,
   deleteBalita,
@@ -22,17 +23,51 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json() as {
-      operations?: SyncOperation[];
-      resolutions?: SyncResolution[];
-      resolution?: "server" | "local";
-      conflict?: {
-        entityId: string;
-        operation: SyncOperation["operation"];
-        serverVersion?: number;
-        localPayload?: SyncOperation["payload"];
-      };
-    };
+    const contentLength = request.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > 5242880) {
+      return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+    }
+
+    const syncRequestSchema = z.object({
+      operations: z.array(
+        z.object({
+          id: z.string(),
+          entity: z.string(),
+          entityId: z.string(),
+          operation: z.enum(["CREATE", "UPDATE", "DELETE"]),
+          payload: z.any().optional(),
+          baseVersion: z.number().optional(),
+        }).passthrough()
+      ).optional(),
+      resolutions: z.array(
+        z.object({
+          conflictId: z.string(),
+          entityId: z.string(),
+          decision: z.enum(["USE_SERVER", "USE_LOCAL"]),
+          localPayload: z.any().optional(),
+          serverVersion: z.number().optional(),
+        }).passthrough()
+      ).optional(),
+      resolution: z.enum(["server", "local"]).optional(),
+      conflict: z.object({
+        entityId: z.string(),
+        operation: z.enum(["CREATE", "UPDATE", "DELETE"]),
+        serverVersion: z.number().optional(),
+        localPayload: z.any().optional(),
+      }).passthrough().optional(),
+    });
+
+    const rawBody = await request.json();
+    const parseResult = syncRequestSchema.safeParse(rawBody);
+
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: "Invalid request payload", details: parseResult.error.format() },
+        { status: 400 }
+      );
+    }
+
+    const body = parseResult.data;
 
     const results: SyncResultItem[] = [];
 
@@ -88,12 +123,12 @@ export async function POST(request: NextRequest) {
     // Preferred batch conflict-resolution shape.
     for (const resolution of body.resolutions ?? []) {
       if (resolution.decision === "USE_SERVER") {
-        const current = await getBalitaAny(resolution.entityId);
+        const current = await getBalitaAny(resolution.entityId as string);
         if (current) {
-          results.push({ id: resolution.conflictId, status: "applied", data: current });
+          results.push({ id: resolution.conflictId as string, status: "applied", data: current });
         } else {
           results.push({
-            id: resolution.conflictId,
+            id: resolution.conflictId as string,
             status: "rejected",
             error: "Balita tidak ditemukan.",
           });
@@ -105,7 +140,7 @@ export async function POST(request: NextRequest) {
       const serverVersion = resolution.serverVersion;
       if (!local || typeof serverVersion !== "number" || !Number.isInteger(serverVersion)) {
         results.push({
-          id: resolution.conflictId,
+          id: resolution.conflictId as string,
           status: "rejected",
           error: "Data resolusi lokal tidak lengkap.",
         });
@@ -113,24 +148,24 @@ export async function POST(request: NextRequest) {
       }
 
       const result = local.deletedAt
-        ? await restoreBalita({ ...local, id: resolution.entityId }, auth.user.id, serverVersion)
-        : await updateBalita({ ...local, id: resolution.entityId }, auth.user.id, serverVersion);
+        ? await restoreBalita({ ...local, id: resolution.entityId as string }, auth.user.id, serverVersion)
+        : await updateBalita({ ...local, id: resolution.entityId as string }, auth.user.id, serverVersion);
 
       if (result.conflict) {
         results.push({
-          id: resolution.conflictId,
+          id: resolution.conflictId as string,
           status: "conflict",
           data: result.current,
         });
       } else if (result.data) {
         results.push({
-          id: resolution.conflictId,
+          id: resolution.conflictId as string,
           status: "applied",
           data: result.data,
         });
       } else {
         results.push({
-          id: resolution.conflictId,
+          id: resolution.conflictId as string,
           status: "rejected",
           error: "Resolusi tidak menghasilkan data.",
         });
@@ -145,7 +180,7 @@ export async function POST(request: NextRequest) {
     for (const op of operations) {
       if (op.entity !== "balita" || !op.id || !op.entityId) {
         results.push({
-          id: op.id,
+          id: op.id as string,
           status: "rejected",
           error: "Operasi tidak valid.",
         });
@@ -155,15 +190,15 @@ export async function POST(request: NextRequest) {
       if (op.operation === "CREATE" && op.payload) {
         try {
           const data = await createBalita(
-            { ...op.payload, id: op.entityId },
+            { ...op.payload, id: op.entityId as string },
             auth.user.id,
           );
-          results.push({ id: op.id, status: "applied", data });
+          results.push({ id: op.id as string, status: "applied", data });
         } catch {
           results.push({
-            id: op.id,
+            id: op.id as string,
             status: "conflict",
-            data: await getBalitaAny(op.entityId),
+            data: await getBalitaAny(op.entityId as string),
           });
         }
         continue;
@@ -173,23 +208,23 @@ export async function POST(request: NextRequest) {
         const result = await updateBalita(
           op.payload,
           auth.user.id,
-          op.baseVersion,
+          op.baseVersion as number,
         );
         if (result.conflict) {
           results.push({
-            id: op.id,
+            id: op.id as string,
             status: "conflict",
             data: result.current,
           });
         } else if (result.data) {
           results.push({
-            id: op.id,
+            id: op.id as string,
             status: "applied",
             data: result.data,
           });
         } else {
           results.push({
-            id: op.id,
+            id: op.id as string,
             status: "rejected",
             error: "Update tidak menghasilkan data.",
           });
@@ -199,20 +234,20 @@ export async function POST(request: NextRequest) {
 
       if (op.operation === "DELETE") {
         const result = await deleteBalita(
-          op.entityId,
+          op.entityId as string,
           auth.user.id,
-          op.baseVersion,
+          op.baseVersion as number,
         );
         results.push(
           result.conflict
-            ? { id: op.id, status: "conflict", data: result.current }
-            : { id: op.id, status: "applied", data: result.data },
+            ? { id: op.id as string, status: "conflict", data: result.current }
+            : { id: op.id as string, status: "applied", data: result.data },
         );
         continue;
       }
 
       results.push({
-        id: op.id,
+        id: op.id as string,
         status: "rejected",
         error: "Payload operasi tidak lengkap.",
       });

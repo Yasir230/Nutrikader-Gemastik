@@ -651,7 +651,7 @@ export function DataBalitaSection() {
                 <Input id="usiaBulan" name="usiaBulan" type="number" min="0" defaultValue={editing?.usiaBulan ?? ""} required />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="lingkarKepala" style={{ color: "var(--color-text)" }}>Lingkar Kepala (cm)</Label>
+                <Label htmlFor="lingkarKepala" className="whitespace-nowrap" style={{ color: "var(--color-text)" }}>Lingkar Kepala (cm)</Label>
                 <Input id="lingkarKepala" name="lingkarKepala" type="number" step="0.1" defaultValue={editing?.pengukuran.at(-1)?.lingkarKepala ?? ""} required />
               </div>
             </div>

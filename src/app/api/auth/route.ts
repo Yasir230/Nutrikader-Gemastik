@@ -4,14 +4,73 @@ import { supabaseRpc } from "@/lib/server/supabase-admin";
 
 export const runtime = "nodejs";
 
+// Rate Limiting (In-Memory Simulation)
+type RateLimitInfo = { count: number; lastAttempt: number };
+const rateLimitStore = new Map<string, RateLimitInfo>();
+const MAX_ATTEMPTS = 5;
+const WINDOW_MS = 60 * 1000;
+
+function isAllowed(ip: string): boolean {
+  const now = Date.now();
+  const info = rateLimitStore.get(ip) ?? { count: 0, lastAttempt: now };
+  if (now - info.lastAttempt > WINDOW_MS) info.count = 0;
+  info.count += 1;
+  info.lastAttempt = now;
+  rateLimitStore.set(ip, info);
+  return info.count <= MAX_ATTEMPTS;
+}
+
+// Sanitization
+function sanitizeInput(input: string): string {
+  if (typeof input !== 'string') return '';
+  return input.trim()
+    .replace(/\0/g, '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
+}
+
+// Validation
+function validateCredentials(email: string, password: string): { isValid: boolean; error?: string } {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(email)) return { isValid: false, error: 'Format email tidak valid.' };
+  if (password.length < 8) return { isValid: false, error: 'Password minimal 8 karakter.' };
+  return { isValid: true };
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
-    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const ip = request.headers.get('x-forwarded-for') ?? 'unknown';
+    if (!isAllowed(ip)) {
+      return NextResponse.json(
+        { success: false, error: "Terlalu banyak percobaan login. Silakan coba lagi nanti." },
+        { status: 429 },
+      );
+    }
 
-    if (!normalizedEmail || !password) {
+    const body = await request.json();
+    const rawEmail = body?.email || "";
+    const rawPassword = body?.password || "";
+
+    const sanitizedEmail = sanitizeInput(rawEmail).toLowerCase();
+    // Keep password characters intact, but remove null bytes to prevent injection,
+    // HTML-escaping password could prevent valid logins with special chars.
+    const sanitizedPassword = typeof rawPassword === 'string' ? rawPassword.replace(/\0/g, '') : '';
+
+    if (!sanitizedEmail || !sanitizedPassword) {
       return NextResponse.json(
         { success: false, error: "Email dan password harus diisi." },
+        { status: 400 },
+      );
+    }
+
+    const validation = validateCredentials(sanitizedEmail, sanitizedPassword);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { success: false, error: validation.error },
         { status: 400 },
       );
     }
@@ -23,8 +82,8 @@ export async function POST(request: NextRequest) {
       role: "admin" | "warga";
       avatar: string | null;
     }>>("verify_user_password", {
-      p_email: normalizedEmail,
-      p_password: String(password),
+      p_email: sanitizedEmail,
+      p_password: sanitizedPassword,
     });
 
     const user = rows[0];
