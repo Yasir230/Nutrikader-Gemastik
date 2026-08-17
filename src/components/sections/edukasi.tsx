@@ -77,6 +77,28 @@ export function EdukasiSection() {
     });
   }, [kategori, wilayah, search]);
 
+  const handleDownload = () => {
+    if (!bukaModul) return;
+    const content = `NutriKader — Program MBG Badan Gizi Nasional\n\nJudul: ${bukaModul.judul}\nKategori: ${bukaModul.kategori}\nWaktu Baca: ${bukaModul.durasiBaca} menit\nTarget Sasaran: ${bukaModul.wilayah === "Semua" ? "Semua Wilayah" : bukaModul.wilayah}\n\nRingkasan:\n${bukaModul.ringkasan}\n\nRincian Resep:\nBahan Utama: ${bukaModul.bahanUtama.join(", ")}\n\nNilai Gizi (Per Porsi):\nKalori: 250 kcal\nProtein: 12 g\nZat Besi: 4.5 mg\n\nLangkah-langkah:\n1. Cuci bersih semua bahan utama (${bukaModul.bahanUtama.join(", ")}).\n2. Siapkan bumbu halus dan tumis dengan sedikit minyak hingga harum.\n3. Masukkan bahan utama, tambahkan air secukupnya, dan masak hingga tekstur sesuai untuk anak/balita.\n4. Sajikan selagi hangat untuk mempertahankan nilai gizi optimal dan meningkatkan selera makan.\n`;
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${bukaModul.judul}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Panduan PDF/Modul berhasil diunduh.");
+  };
+
+  const handleShare = () => {
+    if (!bukaModul) return;
+    const text = `*NutriKader — Program MBG Badan Gizi Nasional*\n\nMari baca modul edukasi ini:\n*${bukaModul.judul}*\n\nRingkasan: ${bukaModul.ringkasan}\n\nKategori: ${bukaModul.kategori}\nBahan Utama: ${bukaModul.bahanUtama.join(", ")}\n\nBagikan panduan ini untuk membantu cegah stunting dan penuhi gizi anak-anak kita!`;
+    window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+    toast.success("Membuka WhatsApp...");
+  };
+
   return (
     <div className="space-y-6">
       <SectionHeader
@@ -294,14 +316,14 @@ export function EdukasiSection() {
                 <Button
                   variant="outline"
                   className="flex items-center gap-2 rounded-[8px]"
-                  onClick={() => toast.success("Panduan PDF sedang diunduh...")}
+                  onClick={handleDownload}
                 >
                   <Download className="w-4 h-4" />
                   Unduh Panduan PDF
                 </Button>
                 <Button
                   className="flex items-center gap-2 rounded-[8px]"
-                  onClick={() => toast.success("Membuka WhatsApp...")}
+                  onClick={handleShare}
                   style={{ backgroundColor: "#25D366", color: "white" }}
                 >
                   <Share2 className="w-4 h-4" />

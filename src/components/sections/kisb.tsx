@@ -83,6 +83,7 @@ export function KisbSection() {
   );
   const cardRef = useRef<HTMLDivElement>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [downloading, setDownloading] = useState(false);
 
   const balita = useMemo(
     () => balitaData.find((b) => b.id === activeId) ?? balitaData[0],
@@ -140,15 +141,70 @@ export function KisbSection() {
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
+    setDownloading(true);
     try {
-      const canvas = await html2canvas(cardRef.current, { scale: 3, useCORS: true, backgroundColor: '#071E49', logging: false });
+      const scale = 2;
+      const bgColor = '#071E49';
+      let canvas: HTMLCanvasElement;
+      
+      try {
+        canvas = await html2canvas(cardRef.current, { 
+          scale, 
+          useCORS: true, 
+          allowTaint: true,
+          backgroundColor: bgColor, 
+          logging: false,
+          scrollX: 0, 
+          scrollY: 0
+        });
+      } catch (err) {
+        console.warn("html2canvas failed, using fallback:", err);
+        // Fallback canvas drawing
+        canvas = document.createElement("canvas");
+        const rect = cardRef.current.getBoundingClientRect();
+        canvas.width = rect.width * scale;
+        canvas.height = rect.height * scale;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.scale(scale, scale);
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, rect.width, rect.height);
+          
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "20px sans-serif";
+          ctx.fillText("KARTU INDONESIA SEHAT BALITA", 20, 40);
+          ctx.font = "14px sans-serif";
+          ctx.fillText(`Nama: ${balita.nama}`, 20, 80);
+          ctx.fillText(`NIK: ${balita.nik}`, 20, 100);
+          ctx.fillText(`No. Kartu: ${nomorKartu}`, 20, 120);
+          
+          if (qrDataUrl) {
+            const qrImg = new Image();
+            qrImg.src = qrDataUrl;
+            await new Promise((resolve) => {
+              qrImg.onload = () => {
+                ctx.drawImage(qrImg, rect.width - 120, 20, 100, 100);
+                resolve(null);
+              };
+              qrImg.onerror = resolve;
+            });
+          }
+        }
+      }
+
       const link = document.createElement("a");
       link.download = `KISB-${balita.nama.replace(/\s+/g, "_")}-${nomorKartu}.png`;
       link.href = canvas.toDataURL("image/png");
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      
       toast.success("Berhasil mengunduh KISB.");
     } catch (error) {
+      console.error(error);
       toast.error("Gagal mengunduh KISB.");
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -181,10 +237,11 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
               variant="outline"
               size="sm"
               onClick={handleDownload}
+              disabled={downloading}
               className="border-[rgba(7,30,73,0.14)] text-[var(--color-primary)] hover:bg-[var(--color-info-tint)]"
             >
               <Download className="w-4 h-4" />
-              Unduh KISB (PDF)
+              {downloading ? "Memproses..." : "Unduh KISB (PNG)"}
             </Button>
             <Button
               size="sm"

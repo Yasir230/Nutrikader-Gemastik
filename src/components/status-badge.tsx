@@ -33,10 +33,10 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-0.5 font-medium rounded-[4px] border",
+        "whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 text-[11px] sm:text-[12px] font-medium py-0.5 px-2 rounded-full border leading-normal",
         className
       )}
-      style={{ backgroundColor: s.bg, color: s.fg, borderColor: s.border, fontSize: "var(--text-caption)" }}
+      style={{ backgroundColor: s.bg, color: s.fg, borderColor: s.border }}
     >
       {dot && (
         <span
@@ -64,7 +64,10 @@ const riskLabel: Record<RiskLevel, string> = {
 
 export function RiskBadge({ level, className }: { level: RiskLevel; className?: string }) {
   return (
-    <StatusBadge tone={riskToneMap[level]} className={className}>
+    <StatusBadge 
+      tone={riskToneMap[level]} 
+      className={cn("whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 text-[11px] sm:text-[12px] font-medium py-0.5 px-2 rounded-full border leading-normal", className)}
+    >
       {riskLabel[level]}
     </StatusBadge>
   );

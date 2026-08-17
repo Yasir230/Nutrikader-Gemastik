@@ -206,8 +206,8 @@ export function DashboardSection() {
                 <tr className="text-left" style={{ color: "var(--color-text-muted)" }}>
                   <th className="font-medium text-[11px] uppercase tracking-wide py-2 pr-3">Nama Balita</th>
                   <th className="font-medium text-[11px] uppercase tracking-wide py-2 pr-3 hidden sm:table-cell">Posyandu</th>
-                  <th className="font-medium text-[11px] uppercase tracking-wide py-2 pr-3 text-right">Usia</th>
-                  <th className="font-medium text-[11px] uppercase tracking-wide py-2 pr-3">Status</th>
+                  <th className="font-medium text-[11px] uppercase tracking-wide py-2 pr-3 text-right whitespace-nowrap">Usia</th>
+                  <th className="font-medium text-[11px] uppercase tracking-wide py-2 pr-3 whitespace-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -221,8 +221,8 @@ export function DashboardSection() {
                       <div style={{ color: "var(--color-text)" }}>{b.posyanduNama}</div>
                       <div className="text-[11px]" style={{ color: "var(--color-text-muted)" }}>{b.kelurahan}</div>
                     </td>
-                    <td className="py-2.5 pr-3 text-right font-data" style={{ color: "var(--color-text)" }}>{b.usiaBulan} bln</td>
-                    <td className="py-2.5 pr-3"><RiskBadge level={b.risiko} /></td>
+                    <td className="py-2.5 pr-3 text-right font-data" style={{ color: "var(--color-text)" }}><span className="whitespace-nowrap">{b.usiaBulan} bln</span></td>
+                    <td className="py-2.5 pr-3"><div className="whitespace-nowrap shrink-0"><RiskBadge level={b.risiko} /></div></td>
                   </tr>
                 ))}
               </tbody>
@@ -263,11 +263,13 @@ export function DashboardSection() {
             {posyanduPerluPerhatian.map((p) => (
               <li key={p.id} className="p-3 rounded-[6px] border" style={{ borderColor: "rgba(7,30,73,0.08)", backgroundColor: "var(--color-bg)" }}>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="min-w-0">
-                    <div className="text-[13px] font-semibold" style={{ color: "var(--color-text)" }}>{p.nama}</div>
-                    <div className="text-[11px]" style={{ color: "var(--color-text-muted)" }}>{p.kelurahan} · Jadwal berikut: {formatTanggal(p.jadwalBerikutnya)}</div>
+                  <div className="min-w-0 flex-1 truncate">
+                    <div className="text-[13px] font-semibold truncate" style={{ color: "var(--color-text)" }}>{p.nama}</div>
+                    <div className="text-[11px] truncate" style={{ color: "var(--color-text-muted)" }}>{p.kelurahan} · Jadwal berikut: {formatTanggal(p.jadwalBerikutnya)}</div>
                   </div>
-                  <StatusBadge tone={p.status === "perlu_perhatian" ? "warning" : "critical"}>{p.status === "perlu_perhatian" ? "Perlu Perhatian" : "Kritis"}</StatusBadge>
+                  <div className="shrink-0 whitespace-nowrap">
+                    <StatusBadge tone={p.status === "perlu_perhatian" ? "warning" : "critical"}>{p.status === "perlu_perhatian" ? "Perlu Perhatian" : "Kritis"}</StatusBadge>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3 text-[11px]" style={{ color: "var(--color-text-muted)" }}>
                   <span className="font-data">Capaian: {p.capaianPencatatan}%</span>

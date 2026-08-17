@@ -194,7 +194,7 @@ export function PetaRisikoSection() {
                 key={s.wilayah}
                 type="button"
                 onClick={() => setOpenWilayah(w?.id ?? null)}
-                className="text-left p-4 rounded-[8px] border-l-[4px] transition-all hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                className="text-left p-4 rounded-[8px] border-l-[4px] transition-all hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 flex flex-col h-full w-full"
                 style={{
                   backgroundColor: levelTint[level],
                   borderLeftColor: levelBorder[level],
@@ -203,31 +203,33 @@ export function PetaRisikoSection() {
                   borderBottom: "1px solid rgba(181,224,234,0.5)",
                 }}
               >
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start justify-between gap-2 mb-2 w-full">
                   <div className="min-w-0">
-                    <div className="font-display text-[16px] truncate" style={{ color: "var(--color-primary)", fontWeight: 500 }}>
+                    <div className="text-[15px] sm:text-[16px] font-display font-semibold text-[var(--color-primary)] leading-snug">
                       {s.wilayah}
                     </div>
-                    <div className="text-[11px]" style={{ color: "var(--color-text-muted)" }}>
+                    <div className="text-[11px] mt-0.5" style={{ color: "var(--color-text-muted)" }}>
                       {s.posyandu} posyandu · {s.balita} balita
                     </div>
                   </div>
-                  <StatusBadge
-                    tone={level === "tinggi" ? "critical" : level === "sedang" ? "warning" : "success"}
-                  >
-                    {levelLabel[level]}
-                  </StatusBadge>
+                  <div className="shrink-0 whitespace-nowrap">
+                    <StatusBadge
+                      tone={level === "tinggi" ? "critical" : level === "sedang" ? "warning" : "success"}
+                    >
+                      {levelLabel[level]}
+                    </StatusBadge>
+                  </div>
                 </div>
-                <div className="mt-3 flex items-end justify-between gap-2">
+                <div className="mt-auto pt-3 flex items-end justify-between gap-4 w-full">
                   <div>
-                    <div className="text-[11px] uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+                    <div className="text-[10px] uppercase tracking-wide mb-1" style={{ color: "var(--color-text-muted)" }}>
                       Prevalensi Stunting
                     </div>
-                    <div className="font-display tabular-nums" style={{ fontSize: 28, fontWeight: 500, color: "var(--color-primary)", lineHeight: 1.1 }}>
+                    <div className="font-display tabular-nums" style={{ fontSize: 24, fontWeight: 600, color: "var(--color-primary)", lineHeight: 1 }}>
                       {s.prevalensi}%
                     </div>
                   </div>
-                  <div className="w-[120px]">
+                  <div className="w-[120px] shrink-0">
                     <div className="text-[10px] uppercase tracking-wide mb-1" style={{ color: "var(--color-text-muted)" }}>
                       Cakupan MBG
                     </div>
@@ -238,7 +240,7 @@ export function PetaRisikoSection() {
                       height={6}
                       showLabel={false}
                     />
-                    <div className="text-[11px] mt-0.5 font-data" style={{ color: "var(--color-text-muted)" }}>
+                    <div className="text-[11px] mt-1 font-data" style={{ color: "var(--color-text-muted)" }}>
                       {s.cakupanMBG}%
                     </div>
                   </div>
