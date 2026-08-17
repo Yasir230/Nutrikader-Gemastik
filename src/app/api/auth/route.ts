@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 // Rate Limiting (In-Memory Simulation)
 type RateLimitInfo = { count: number; lastAttempt: number };
 const rateLimitStore = new Map<string, RateLimitInfo>();
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 15;
 const WINDOW_MS = 60 * 1000;
 
 function isAllowed(ip: string): boolean {
@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    rateLimitStore.delete(ip);
     await createSession(user.id);
     return NextResponse.json({
       success: true,

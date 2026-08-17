@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Plus_Jakarta_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { SyncEngineRegister } from "@/components/sync-engine-register";
 
@@ -56,6 +57,7 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <SyncEngineRegister />
         <Toaster />
+        <SonnerToaster position="top-right" richColors />
       </body>
     </html>
   );
