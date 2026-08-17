@@ -73,14 +73,14 @@ export function Topbar() {
 
   return (
     <header
-      className="sticky top-0 z-30 flex items-center gap-3 px-4 md:px-6 lg:px-8 py-3"
+      className="sticky top-0 z-30 flex items-center gap-2 md:gap-3 px-2 md:px-6 lg:px-8 py-3 max-w-full overflow-x-hidden"
       style={{
         backgroundColor: "var(--color-bg)",
         borderBottom: "1px solid rgba(181, 224, 234, 0.5)",
       }}
     >
       {/* Mobile brand */}
-      <div className="md:hidden flex items-center gap-2">
+      <div className="md:hidden flex items-center gap-1 sm:gap-2 shrink-0">
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
             <button
@@ -164,7 +164,7 @@ export function Topbar() {
       </div>
 
       {/* Search — global NIK/nama (KF-13) */}
-      <div ref={searchRef} className="relative flex-1 max-w-xl ml-auto md:ml-4 lg:ml-6">
+      <div ref={searchRef} className="relative flex-1 max-w-xl ml-auto md:ml-4 lg:ml-6 min-w-0">
         <div
           className="flex items-center gap-2 px-3 py-2 rounded-[8px] border"
           style={{
@@ -255,7 +255,7 @@ export function Topbar() {
       </div>
 
       {/* Notification */}
-      <div className="relative">
+      <div className="relative shrink-0">
         <button
           type="button"
           onClick={() => toggleNotif()}
@@ -409,7 +409,7 @@ export function Topbar() {
       <button
         type="button"
         onClick={logout}
-        className="md:hidden p-2 rounded-[6px] border min-h-[var(--touch-min)] min-w-[var(--touch-min)] flex items-center justify-center"
+        className="md:hidden p-2 rounded-[6px] border min-h-[var(--touch-min)] min-w-[var(--touch-min)] flex items-center justify-center shrink-0"
         style={{
           borderColor: "rgba(7, 30, 73, 0.14)",
           color: "var(--color-text-muted)",

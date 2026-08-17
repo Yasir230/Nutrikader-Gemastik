@@ -137,7 +137,7 @@ export function SeminarSection() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <SectionHeader
         eyebrow="EDUKASI & SEMINAR"
         title="Seminar Gizi Gratis untuk Ibu Balita"
@@ -160,7 +160,7 @@ export function SeminarSection() {
       />
 
       {/* KPI strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid max-w-full overflow-x-auto grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard
           label="Seminar Terjadwal"
           value={seminarTerjadwal.length}
@@ -268,7 +268,7 @@ export function SeminarSection() {
                 required
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid max-w-full overflow-x-auto grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Tanggal</Label>
                 <Input
@@ -352,6 +352,8 @@ function SeminarCard({
   onOpenKirimPengingat: (s: Seminar) => void;
   onUpdateSeminar: (s: Seminar) => void;
 }) {
+  const { user } = useAuth();
+  const userName = user?.name || "Siti Aisyah";
   const kuotaPct = Math.round((seminar.terdaftar / seminar.kuota) * 100);
   // State pita: >=80 on-track, >=50 attention, else critical
   const pitaState: "on-track" | "attention" | "critical" =
@@ -366,11 +368,93 @@ function SeminarCard({
   const certificateRef = useRef<HTMLDivElement>(null);
 
   const handleUnduhSertifikat = async () => {
-    if (certificateRef.current) {
-      toast.info("Sedang menghasilkan sertifikat...");
-      try {
-        const canvas = await html2canvas(certificateRef.current);
-        const dataUrl = canvas.toDataURL("image/png");
+    toast.info("Sedang menghasilkan sertifikat...");
+    try {
+      let dataUrl = "";
+      if (certificateRef.current) {
+        try {
+          const canvas = await html2canvas(certificateRef.current, { scale: 2, useCORS: true } as any);
+          dataUrl = canvas.toDataURL("image/png");
+        } catch (html2CanvasError) {
+          console.warn("html2canvas failed, falling back to Canvas 2D", html2CanvasError);
+        }
+      }
+      if (!dataUrl) {
+        // Direct Canvas 2D fallback
+        const canvas = document.createElement("canvas");
+        canvas.width = 1600;
+        canvas.height = 1200;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, 1600, 1200);
+          ctx.lineWidth = 20;
+          ctx.strokeStyle = "#071E49";
+          ctx.strokeRect(40, 40, 1520, 1120);
+          ctx.lineWidth = 10;
+          ctx.strokeRect(70, 70, 1460, 1060);
+          
+          ctx.fillStyle = "#071E49";
+          ctx.textAlign = "center";
+          ctx.font = "bold 60px serif";
+          ctx.fillText("SERTIFIKAT PENGHARGAAN", 800, 250);
+          
+          ctx.font = "30px sans-serif";
+          ctx.fillStyle = "#555555";
+          ctx.fillText("Diberikan kepada:", 800, 350);
+          
+          ctx.font = "bold 70px sans-serif";
+          ctx.fillStyle = "#000000";
+          ctx.fillText(userName, 800, 480);
+          
+          ctx.font = "30px sans-serif";
+          ctx.fillStyle = "#555555";
+          ctx.fillText("Atas partisipasinya dalam seminar:", 800, 600);
+          
+          ctx.font = "bold 45px sans-serif";
+          ctx.fillStyle = "#071E49";
+          ctx.fillText(seminar.judul, 800, 700);
+          
+          ctx.font = "28px sans-serif";
+          ctx.fillStyle = "#777777";
+          ctx.fillText(`Diselenggarakan pada ${formatTanggal(seminar.tanggal)}`, 800, 800);
+          
+          ctx.beginPath();
+          ctx.moveTo(200, 1000);
+          ctx.lineTo(500, 1000);
+          ctx.strokeStyle = "#000";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.font = "24px sans-serif";
+          ctx.fillStyle = "#000";
+          ctx.fillText("dr. Rina Marlina", 350, 1040);
+          ctx.fillText("Panitia Penyelenggara", 350, 1080);
+          
+          // Seal
+          ctx.save();
+          ctx.translate(1300, 950);
+          ctx.rotate(-15 * Math.PI / 180);
+          ctx.beginPath();
+          ctx.arc(0, 0, 120, 0, 2 * Math.PI);
+          ctx.strokeStyle = "#e11d48";
+          ctx.lineWidth = 8;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(0, 0, 105, 0, 2 * Math.PI);
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.font = "bold 20px sans-serif";
+          ctx.fillStyle = "#e11d48";
+          ctx.fillText("★ PANITIA BGN ★", 0, -20);
+          ctx.fillText("TERVERIFIKASI", 0, 10);
+          ctx.fillText("CAP RESMI", 0, 40);
+          ctx.restore();
+          
+          dataUrl = canvas.toDataURL("image/png");
+        }
+      }
+      
+      if (dataUrl) {
         const link = document.createElement("a");
         link.href = dataUrl;
         link.download = `Sertifikat-${seminar.judul}.png`;
@@ -378,9 +462,11 @@ function SeminarCard({
         link.click();
         document.body.removeChild(link);
         toast.success("Sertifikat berhasil diunduh!");
-      } catch (error) {
-        toast.error("Gagal menghasilkan sertifikat.");
+      } else {
+        throw new Error("Gagal generate data url");
       }
+    } catch (error) {
+      toast.error("Gagal menghasilkan sertifikat.");
     }
   };
 
@@ -392,7 +478,7 @@ function SeminarCard({
         borderColor: "rgba(7,30,73,0.08)",
       }}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 lg:gap-6">
+      <div className="grid max-w-full overflow-x-auto grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 lg:gap-6">
         {/* KIRI — info */}
         <div className="flex flex-col gap-2.5 min-w-0">
           <div className="flex items-start gap-3">
@@ -658,10 +744,18 @@ function SeminarCard({
         <div
           ref={certificateRef}
           style={{
-            width: "800px",
-            height: "600px",
+            width: "1200px",
+            height: "850px",
             backgroundColor: "#fff",
-            border: "10px solid var(--color-primary)",
+            border: "15px solid #071E49",
+            padding: "15px",
+            boxSizing: "border-box",
+          }}
+        >
+          <div style={{
+            width: "100%",
+            height: "100%",
+            border: "8px solid #071E49",
             padding: "40px",
             textAlign: "center",
             display: "flex",
@@ -669,32 +763,51 @@ function SeminarCard({
             justifyContent: "center",
             alignItems: "center",
             fontFamily: "sans-serif",
-          }}
-        >
-          <h1 style={{ color: "var(--color-primary)", marginBottom: "10px" }}>SERTIFIKAT PENGHARGAAN</h1>
-          <p style={{ fontSize: "18px", color: "#555" }}>Diberikan kepada:</p>
-          <h2 style={{ fontSize: "28px", margin: "20px 0", color: "#333" }}>NAMA PESERTA</h2>
-          <p style={{ fontSize: "18px", color: "#555" }}>Atas partisipasinya dalam seminar:</p>
-          <h3 style={{ fontSize: "24px", margin: "20px 0", color: "var(--color-primary)" }}>{seminar.judul}</h3>
-          <p style={{ fontSize: "16px", color: "#777" }}>Diselenggarakan pada {formatTanggal(seminar.tanggal)}</p>
-          <div style={{ marginTop: "40px", display: "flex", justifyContent: "space-between", width: "100%" }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ width: "150px", borderBottom: "1px solid #333", marginBottom: "10px" }}></div>
-              <p>Panitia Penyelenggara</p>
+            boxSizing: "border-box",
+            position: "relative",
+          }}>
+            <h1 style={{ color: "#071E49", marginBottom: "20px", fontSize: "48px", fontFamily: "serif", textTransform: "uppercase" }}>SERTIFIKAT PENGHARGAAN</h1>
+            <p style={{ fontSize: "22px", color: "#555", marginBottom: "20px" }}>Diberikan kepada:</p>
+            <h2 style={{ fontSize: "52px", margin: "20px 0 30px 0", color: "#000", fontWeight: "bold" }}>{userName}</h2>
+            <p style={{ fontSize: "22px", color: "#555", marginBottom: "20px" }}>Atas partisipasinya dalam seminar:</p>
+            <h3 style={{ fontSize: "36px", margin: "20px 0", color: "#071E49", fontWeight: "bold", maxWidth: "80%", lineHeight: "1.3" }}>{seminar.judul}</h3>
+            <p style={{ fontSize: "20px", color: "#777", marginTop: "20px" }}>Diselenggarakan pada {formatTanggal(seminar.tanggal)}</p>
+            
+            <div style={{ position: "absolute", bottom: "60px", left: "80px", textAlign: "center" }}>
+              <div style={{ 
+                fontFamily: "'Brush Script MT', cursive, sans-serif", 
+                fontSize: "40px", 
+                color: "#000",
+                marginBottom: "5px"
+              }}>
+                Rina M
+              </div>
+              <div style={{ width: "250px", borderBottom: "2px solid #333", marginBottom: "10px" }}></div>
+              <p style={{ fontSize: "20px", fontWeight: "bold", margin: "0" }}>dr. Rina Marlina</p>
+              <p style={{ fontSize: "16px", color: "#555", margin: "5px 0 0 0" }}>Panitia Penyelenggara</p>
             </div>
+            
             <div style={{
-              width: "100px",
-              height: "100px",
+              position: "absolute",
+              bottom: "40px",
+              right: "80px",
+              width: "180px",
+              height: "180px",
               borderRadius: "50%",
-              border: "3px solid red",
+              border: "6px solid #e11d48",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              color: "red",
+              color: "#e11d48",
               fontWeight: "bold",
-              transform: "rotate(-15deg)"
+              transform: "rotate(-15deg)",
+              boxShadow: "inset 0 0 0 4px #fff, inset 0 0 0 7px #e11d48",
+              backgroundColor: "rgba(225, 29, 72, 0.05)"
             }}>
-              CAP RESMI
+              <span style={{ fontSize: "18px", marginBottom: "5px" }}>★ PANITIA BGN ★</span>
+              <span style={{ fontSize: "16px", marginBottom: "5px" }}>TERVERIFIKASI</span>
+              <span style={{ fontSize: "22px" }}>CAP RESMI</span>
             </div>
           </div>
         </div>
@@ -773,15 +886,26 @@ function DialogInputPresensi({
   seminar: Seminar;
   onUpdateSeminar: (s: Seminar) => void;
 }) {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  const userName = user?.name || "Siti Aisyah";
+  
   const [participants, setParticipants] = useState(MOCK_PARTICIPANTS);
+  const [wargaHadir, setWargaHadir] = useState(false);
 
   const handleToggle = (id: number) => {
     setParticipants(participants.map((p) => (p.id === id ? { ...p, hadir: !p.hadir } : p)));
   };
 
   const handleSave = () => {
-    const hadirCount = participants.filter((p) => p.hadir).length;
-    onUpdateSeminar({ ...seminar, hadir: hadirCount });
+    if (isAdmin) {
+      const hadirCount = participants.filter((p) => p.hadir).length;
+      onUpdateSeminar({ ...seminar, hadir: hadirCount });
+    } else {
+      if (wargaHadir) {
+        onUpdateSeminar({ ...seminar, hadir: seminar.hadir + 1 });
+      }
+    }
     toast.success("Presensi berhasil disimpan!");
     onOpenChange(false);
   };
@@ -792,33 +916,47 @@ function DialogInputPresensi({
         <DialogHeader>
           <DialogTitle>Input Presensi: {seminar.judul}</DialogTitle>
           <DialogDescription>
-            Tandai kehadiran peserta. Total hadir: {participants.filter((p) => p.hadir).length}
+            {isAdmin ? `Tandai kehadiran peserta. Total hadir: ${participants.filter((p) => p.hadir).length}` : "Presensi Kehadiran Mandiri Peserta"}
           </DialogDescription>
         </DialogHeader>
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Hadir</TableHead>
-                <TableHead>Nama Ibu</TableHead>
-                <TableHead>Nama Balita</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {participants.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={p.hadir}
-                      onCheckedChange={() => handleToggle(p.id)}
-                    />
-                  </TableCell>
-                  <TableCell>{p.ibu}</TableCell>
-                  <TableCell>{p.balita}</TableCell>
+          {isAdmin ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Hadir</TableHead>
+                  <TableHead>Nama Ibu</TableHead>
+                  <TableHead>Nama Balita</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {participants.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={p.hadir}
+                        onCheckedChange={() => handleToggle(p.id)}
+                      />
+                    </TableCell>
+                    <TableCell>{p.ibu}</TableCell>
+                    <TableCell>{p.balita}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="flex items-center space-x-3 p-4 border rounded-md">
+              <Checkbox
+                checked={wargaHadir}
+                onCheckedChange={(c) => setWargaHadir(!!c)}
+                id="warga-hadir"
+              />
+              <div className="flex flex-col">
+                <Label htmlFor="warga-hadir" className="font-semibold">{userName}</Label>
+                <span className="text-sm text-gray-500">Balita: Aisyah Putri Ramadhani</span>
+              </div>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button onClick={handleSave}>Simpan Presensi</Button>
@@ -892,3 +1030,5 @@ function SeminarEmpty() {
     </div>
   );
 }
+
+

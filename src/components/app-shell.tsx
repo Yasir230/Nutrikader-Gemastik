@@ -32,12 +32,16 @@ export function AppShell() {
     if (effectiveSection !== section) setSection(effectiveSection);
   }, [effectiveSection, section, setSection]);
 
+  useEffect(() => {
+    (window as any).__setSection = setSection;
+  }, [setSection]);
+
   return (
-    <div className="flex min-h-screen" data-role={role} style={{ backgroundColor: "var(--color-bg)" }}>
+    <div className="flex min-h-screen max-w-full overflow-x-hidden" data-role={role} style={{ backgroundColor: "var(--color-bg)" }}>
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 max-w-full overflow-x-hidden">
         <Topbar />
-        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 pb-24 md:pb-8 lg:pb-10 max-w-[1280px] w-full mx-auto">
+        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 pb-24 md:pb-8 lg:pb-10 max-w-[1280px] w-full mx-auto overflow-x-hidden">
           {effectiveSection === "dashboard" && <DashboardSection />}
           {effectiveSection === "data-balita" && <DataBalitaSection />}
           {effectiveSection === "detail-balita" && <DetailBalitaSection />}

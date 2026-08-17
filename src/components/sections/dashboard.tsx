@@ -46,7 +46,7 @@ export function DashboardSection() {
     .slice(0, 4);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       {/* Welcome strip */}
       <div className="bg-gradient-to-r from-[#03132e] via-[#071e49] to-[#041533] rounded-2xl border border-white/10 p-6 sm:p-8 relative overflow-hidden shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="absolute -top-12 -right-12 text-white opacity-5 pointer-events-none">
@@ -153,7 +153,7 @@ export function DashboardSection() {
       </div>
 
       {/* KPI grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 max-w-full overflow-x-auto">
         <KpiCard label="Total Balita Aktif" value={kpiAgregat.totalBalita} unit="balita" delta={{ value: 2.4, positive: true, label: "vs bulan lalu" }} accent="primary" icon={<Users className="w-4 h-4" />} />
         <KpiCard label="Balita Risiko Tinggi" value={kpiAgregat.balitaBerisikoTinggi} unit="balita" delta={{ value: 8.1, positive: false, label: "perlu rujukan" }} accent="critical" icon={<AlertTriangle className="w-4 h-4" />} />
         <KpiCard label="Cakupan MBG Bulan Ini" value={kpiAgregat.cakupanMBGBulanan} unit="%" delta={{ value: 4.2, positive: true, label: "sasaran terverifikasi" }} accent="success" icon={<UtensilsCrossed className="w-4 h-4" />} />
@@ -229,7 +229,7 @@ export function DashboardSection() {
       </div>
 
       {/* Pita Capaian per posyandu + Daftar balita berisiko */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 max-w-full overflow-x-auto">
         <FlatCard className="lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
             <div>

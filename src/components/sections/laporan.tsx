@@ -182,13 +182,13 @@ export function LaporanSection() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <SectionHeader
         eyebrow="MBG & LAPORAN"
         title="Laporan Bulanan Posyandu"
         description="Rekap data bulanan posyandu yang dapat diunduh untuk pelaporan ke Dinas Kesehatan."
         actions={
-          <>
+          <div className="flex flex-wrap gap-2 max-w-full overflow-x-auto pb-1">
             <Button
               variant="ghost"
               size="sm"
@@ -213,13 +213,13 @@ export function LaporanSection() {
               <Archive className="w-4 h-4" />
               Unduh Semua (ZIP)
             </Button>
-          </>
+          </div>
         }
       />
 
       {/* Filter bar */}
       <FlatCard>
-        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3 max-w-full overflow-x-auto">
           <div className="flex flex-col gap-1.5">
             <label className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: "var(--color-text-muted)" }}>
               Periode
@@ -263,7 +263,7 @@ export function LaporanSection() {
       </FlatCard>
 
       {/* Summary strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 max-w-full overflow-x-auto">
         <FlatCard pad="p-3">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4" style={{ color: "var(--color-primary)" }} />

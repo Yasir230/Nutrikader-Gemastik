@@ -100,7 +100,7 @@ export function KisbSection() {
 
   if (!balita) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-full overflow-x-hidden">
         <SectionHeader
           eyebrow="OPERASIONAL"
           title="Kartu Indonesia Sehat Balita (KISB) Digital"
@@ -332,7 +332,7 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <SectionHeader
         eyebrow="OPERASIONAL"
         title="Kartu Indonesia Sehat Balita (KISB) Digital"
@@ -508,7 +508,7 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
       </div>
 
       {/* Grid 3 info cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid max-w-full overflow-x-auto grid-cols-1 lg:grid-cols-3 gap-4">
         {/* 1. Riwayat Antropometri Terkini */}
         <FlatCard>
           <div className="flex items-center gap-2 mb-3">
@@ -718,3 +718,5 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
     </div>
   );
 }
+
+

@@ -5,6 +5,7 @@ import { PitaCapaian } from "@/components/pita-capaian";
 import { SectionHeader, FlatCard } from "@/components/section";
 import { RiskBadge, StatusBadge } from "@/components/status-badge";
 import { useNav } from "@/lib/nav-store";
+import { useAuth } from "@/lib/auth-store";
 import {
   kpiAgregat,
   balitaData,
@@ -39,6 +40,8 @@ const BULAN = ["Ags", "Sep", "Okt", "Nov", "Des", "Jan"];
 
 export function MbgSection() {
   const { openBalita } = useNav();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncCount, setSyncCount] = useState(() =>
     balitaData.filter((b) => b.sinkronisasi !== "tersinkron").length
@@ -91,13 +94,13 @@ export function MbgSection() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <SectionHeader
         eyebrow="MBG & LAPORAN"
         title="Integrasi Program Makan Bergizi Gratis (MBG)"
         description="Pemantauan data sasaran penerima MBG (balita, ibu hamil, ibu menyusui) yang terverifikasi NIK, cakupan penyaluran, dan evaluasi dampak gizi."
         actions={
-          <>
+          <div className="flex flex-wrap gap-2 max-w-full overflow-x-auto pb-1">
             <Button
               variant="ghost"
               size="sm"
@@ -127,12 +130,12 @@ export function MbgSection() {
               )}
               {isSyncing ? "Menyinkronkan..." : "Sinkronkan ke Server BGN"}
             </Button>
-          </>
+          </div>
         }
       />
 
       {/* KPI grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 max-w-full overflow-x-auto">
         <KpiCard
           label="Sasaran MBG Terverifikasi"
           value={sasaranTerverifikasi}
@@ -308,7 +311,8 @@ export function MbgSection() {
       </FlatCard>
 
       {/* Prioritas penyaluran MBG — Balita Risiko Tinggi */}
-      <FlatCard>
+      {isAdmin && (
+        <FlatCard>
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-[15px] font-semibold" style={{ color: "var(--color-primary)" }}>
@@ -367,6 +371,7 @@ export function MbgSection() {
           ))}
         </div>
       </FlatCard>
+      )}
 
       {/* Box info sinergi NutriKader × MBG */}
       <div

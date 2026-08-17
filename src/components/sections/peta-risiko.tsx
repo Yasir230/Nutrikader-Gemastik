@@ -116,7 +116,7 @@ export function PetaRisikoSection() {
     : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <SectionHeader
         eyebrow="MBG & LAPORAN"
         title="Peta Sebaran Risiko Stunting"
@@ -124,7 +124,7 @@ export function PetaRisikoSection() {
       />
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid max-w-full overflow-x-auto grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard
           label="Total Balita Wilayah"
           value={totalBalitaWilayah}
@@ -185,7 +185,7 @@ export function PetaRisikoSection() {
             </span>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid max-w-full overflow-x-auto grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {sebaranRisiko.map((s) => {
             const level = s.level as Level;
             const w = wilayahData.find((x) => x.nama === s.wilayah);
@@ -268,7 +268,7 @@ export function PetaRisikoSection() {
             Prioritas
           </span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid max-w-full overflow-x-auto grid-cols-1 md:grid-cols-3 gap-3">
           {topPrioritas.map((s, i) => {
             const level = s.level as Level;
             const reks = rekomendasi[level] ?? rekomendasi.tinggi;
@@ -462,7 +462,7 @@ export function PetaRisikoSection() {
           </DialogHeader>
           {activeWilayah && (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid max-w-full overflow-x-auto grid-cols-3 gap-3">
                 <div className="p-2 rounded-[6px]" style={{ backgroundColor: "var(--color-bg)" }}>
                   <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>Prevalensi</div>
                   <div className="font-display tabular-nums" style={{ fontSize: 20, fontWeight: 500, color: "var(--color-critical)" }}>
@@ -559,3 +559,5 @@ export function PetaRisikoSection() {
     </div>
   );
 }
+
+
