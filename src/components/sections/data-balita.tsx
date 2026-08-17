@@ -85,7 +85,7 @@ export function DataBalitaSection() {
       if (posyanduFilter !== "all" && b.posyanduId !== posyanduFilter) return false;
       return true;
     });
-  }, [search, riskFilter, posyanduFilter]);
+  }, [search, riskFilter, posyanduFilter, balita]);
 
   const totalTinggi = filtered.filter((b) => b.risiko === "tinggi").length;
   const totalMBG = filtered.filter((b) => b.penerimaMBG).length;

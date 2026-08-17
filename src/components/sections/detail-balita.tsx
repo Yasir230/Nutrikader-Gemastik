@@ -51,6 +51,7 @@ function getInitials(nama: string): string {
 export function DetailBalitaSection() {
   const { selectedBalitaId, openBalita, setSection } = useNav();
   const [balita, setBalita] = useState<BalitaRecord | null>(null);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -114,8 +115,6 @@ export function DetailBalitaSection() {
     );
   }
 
-  const chartRef = useRef<HTMLDivElement>(null);
-
   const handleUnduhGrafik = async () => {
     if (!chartRef.current) return;
     try {
@@ -138,7 +137,7 @@ export function DetailBalitaSection() {
   const initials = getInitials(balita.nama);
   // pengukuran di mock data sudah di-sort descending (terbaru di awal).
   // Untuk grafik kita butuh ascending (termuda → tertua) supaya garis L→R.
-  const pengukuranAsc = [...balita.pengukuran].sort(
+  const pengukuranAsc = [...(balita.pengukuran || [])].sort(
     (a, b) => a.usiaBulan - b.usiaBulan
   );
   const terakhir = pengukuranAsc[pengukuranAsc.length - 1];
@@ -517,7 +516,7 @@ export function DetailBalitaSection() {
               Alasan deteksi risiko
             </div>
             <ul className="space-y-1.5">
-              {balita.alasanRisiko.map((a, i) => (
+              {(balita.alasanRisiko || []).map((a, i) => (
                 <li
                   key={i}
                   className="flex items-start gap-2 text-[13px]"
@@ -767,7 +766,7 @@ export function DetailBalitaSection() {
               Riwayat Imunisasi
             </h3>
             <p className="text-[12px]" style={{ color: "var(--color-text-muted)" }}>
-              {balita.imunisasi.length} imunisasi tercatat
+              {(balita.imunisasi || []).length} imunisasi tercatat
             </p>
           </div>
           <div
@@ -795,7 +794,7 @@ export function DetailBalitaSection() {
                 </tr>
               </thead>
               <tbody>
-                {balita.imunisasi.map((im) => (
+                {(balita.imunisasi || []).map((im) => (
                   <tr
                     key={im.id}
                     className="border-t transition-colors hover:bg-[var(--color-info-tint)]"
@@ -841,10 +840,10 @@ export function DetailBalitaSection() {
               Riwayat Penerimaan MBG
             </h3>
             <p className="text-[12px]" style={{ color: "var(--color-text-muted)" }}>
-              {balita.penerimaanMBG.length} distribusi tercatat
+              {(balita.penerimaanMBG || []).length} distribusi tercatat
             </p>
           </div>
-          {balita.penerimaanMBG.length === 0 ? (
+          {(balita.penerimaanMBG || []).length === 0 ? (
             <div
               className="p-4 border-t"
               style={{ borderColor: "rgba(181,224,234,0.5)" }}

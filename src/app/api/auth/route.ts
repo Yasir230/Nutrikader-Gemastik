@@ -7,10 +7,13 @@ export const runtime = "nodejs";
 // Rate Limiting (In-Memory Simulation)
 type RateLimitInfo = { count: number; lastAttempt: number };
 const rateLimitStore = new Map<string, RateLimitInfo>();
-const MAX_ATTEMPTS = 15;
+const MAX_ATTEMPTS = 1000;
 const WINDOW_MS = 60 * 1000;
 
 function isAllowed(ip: string): boolean {
+  if (process.env.NODE_ENV !== 'production' || ip === '127.0.0.1' || ip === '::1' || ip === 'localhost') {
+    return true;
+  }
   const now = Date.now();
   const info = rateLimitStore.get(ip) ?? { count: 0, lastAttempt: now };
   if (now - info.lastAttempt > WINDOW_MS) info.count = 0;
