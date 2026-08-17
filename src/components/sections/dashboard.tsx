@@ -48,41 +48,67 @@ export function DashboardSection() {
   return (
     <div className="space-y-6">
       {/* Welcome strip */}
-      <div
-        className="rounded-[8px] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-        style={{ backgroundColor: "var(--color-primary)", color: "#FFFFFF" }}
-      >
-        <div>
-          <div className="text-[11px] tracking-[0.12em] uppercase" style={{ color: "var(--color-info)" }}>
-            Selamat datang, {user?.name || "Pengguna"}
+      <div className="bg-gradient-to-r from-[#03132e] via-[#071e49] to-[#041533] rounded-2xl border border-white/10 p-6 sm:p-8 relative overflow-hidden shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="absolute -top-12 -right-12 text-white opacity-5 pointer-events-none">
+          <Activity className="w-64 h-64" />
+        </div>
+
+        <div className="relative z-10 flex-1">
+          <div className="inline-flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <Activity className="w-4 h-4" />
+            </div>
+            <span className="text-emerald-400 text-xs font-semibold tracking-widest uppercase">
+              SELAMAT DATANG, {user?.name?.toUpperCase() || "PENGGUNA"}
+            </span>
           </div>
-          <h2 className="font-display text-[24px] mt-1" style={{ fontWeight: 500 }}>
+          
+          <h2 className="font-display text-2xl sm:text-3xl lg:text-[32px] font-bold text-white leading-tight mt-3 max-w-xl">
             {isAdmin ? "Ringkasan Operasional Wilayah Jatinegara" : "Ringkasan Data Anak & Posyandu Anda"}
           </h2>
-          <p className="text-[13px] mt-1 max-w-xl" style={{ color: "var(--color-info)" }}>
+          
+          <div className="w-12 h-1 bg-emerald-500 rounded-full my-3.5"></div>
+          
+          <p className="text-white/80 text-sm max-w-lg leading-relaxed">
             {isAdmin
               ? `Pemantauan ${kpiAgregat.totalBalita} balita aktif di ${kpiAgregat.posyanduAktif} posyandu. ${kpiAgregat.balitaBerisikoTinggi} balita berisiko tinggi memerlukan tindak lanjut segera.`
-              : `Pemantauan perkembangan anak dan jadwal posyandu terdekat. Cakupan MBG bulan ini: ${kpiAgregat.cakupanMBGBulanan}%.`
+              : "Pantau tumbuh kembang anak dan jadwal posyandu terdekat dengan mudah dan akurat."
             }
           </p>
         </div>
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 mt-4 sm:mt-0">
-          <button
-            type="button"
+
+        <div className="relative z-10 w-full lg:w-[380px] shrink-0 flex flex-col gap-3.5 mt-6 lg:mt-0">
+          <div 
             onClick={() => setSection("data-balita")}
-            className="bg-[var(--color-success)] text-[#071E49] hover:opacity-90 font-semibold px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition-all"
+            className="bg-gradient-to-r from-[#8cd33a] to-[#76b82a] text-[#071E49] p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer text-left w-full"
           >
-            Lihat Data Balita
-            <ArrowRight className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
+            <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#588d1d] shadow-sm shrink-0">
+              <Users className="w-6 h-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-[16px] text-[#071E49] leading-snug">Lihat Data Balita</div>
+              <div className="text-xs text-[#071E49]/80 mt-0.5 leading-snug">Lihat riwayat dan perkembangan balita Anda</div>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center text-[#071E49] shadow-sm shrink-0">
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+          
+          <div 
             onClick={() => setSection("mbg")}
-            className="bg-white/10 text-white hover:bg-white/20 border border-white/20 font-medium px-4 py-2.5 rounded-lg flex items-center gap-2 backdrop-blur-sm transition-all"
+            className="bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer text-left w-full"
           >
-            <UtensilsCrossed className="w-4 h-4" />
-            Monitor Program MBG
-          </button>
+            <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#1d4ed8] shadow-sm shrink-0">
+              <UtensilsCrossed className="w-6 h-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-[16px] text-white leading-snug">Monitor Program MBG</div>
+              <div className="text-xs text-white/80 mt-0.5 leading-snug">Pantau pelaksanaan program MBG di wilayah Anda</div>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white shadow-sm shrink-0">
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
         </div>
       </div>
 

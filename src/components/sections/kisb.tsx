@@ -147,24 +147,106 @@ export function KisbSection() {
   const handleDownload = async () => {
     if (!cardRef.current) return;
     setDownloading(true);
+    toast.info("Menyiapkan unduhan...");
     try {
-      const canvas = await html2canvas(cardRef.current, { 
-        scale: 3, 
-        useCORS: true, 
-        allowTaint: true,
-        backgroundColor: '#041533', 
-        logging: false,
-        scrollX: 0, 
-        scrollY: 0
-      } as any);
-      const link = document.createElement("a");
-      link.download = `KISB-${balita.nama.replace(/\s+/g, "_")}-${nomorKartu}.png`;
-      link.href = canvas.toDataURL("image/png");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      let canvas: HTMLCanvasElement | null = null;
+      try {
+        canvas = await (html2canvas as any)(cardRef.current, { 
+          scale: 2, 
+          useCORS: true, 
+          allowTaint: true,
+          backgroundColor: '#041533', 
+          logging: false,
+          scrollX: 0, 
+          scrollY: 0,
+          onclone: (clonedDoc: any) => {}
+        });
+      } catch (err) {
+        console.warn("html2canvas error, falling back to Canvas 2D:", err);
+      }
       
-      toast.success("Berhasil mengunduh KISB.");
+      if (!canvas) {
+        canvas = document.createElement("canvas");
+        canvas.width = 800;
+        canvas.height = 400;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Canvas 2D not supported");
+        
+        ctx.fillStyle = "#041533";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 22px sans-serif";
+        ctx.fillText("KARTU INDONESIA SEHAT BALITA", 40, 50);
+        
+        ctx.fillStyle = "#10b981";
+        ctx.font = "14px sans-serif";
+        ctx.fillText("NutriKader · Badan Gizi Nasional", 40, 75);
+        
+        ctx.fillStyle = "#10b981";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText("NO. KARTU", 580, 45);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 18px monospace";
+        ctx.fillText(nomorKartu, 580, 65);
+        
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.2)";
+        ctx.beginPath(); ctx.moveTo(40, 95); ctx.lineTo(760, 95); ctx.stroke();
+        
+        ctx.font = "bold 24px sans-serif";
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText(balita.nama, 40, 140);
+        
+        ctx.font = "14px sans-serif";
+        ctx.fillStyle = "#10b981";
+        ctx.fillText("NIK", 40, 180);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "bold 15px monospace";
+        ctx.fillText(balita.nik, 180, 180);
+        
+        ctx.fillStyle = "#10b981";
+        ctx.font = "14px sans-serif";
+        ctx.fillText("Tgl. Lahir", 40, 210);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText(formatTanggal(balita.tanggalLahir), 180, 210);
+        
+        ctx.fillStyle = "#10b981";
+        ctx.fillText("Jenis Kelamin", 40, 240);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText(jenisKelaminLabel(balita.jenisKelamin), 180, 240);
+        
+        ctx.fillStyle = "#10b981";
+        ctx.fillText("Posyandu", 40, 270);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText(balita.posyanduNama, 180, 270);
+        
+        if (qrDataUrl) {
+          const img = new Image();
+          await new Promise((res) => { img.onload = res; img.src = qrDataUrl; });
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(580, 120, 140, 140);
+          ctx.drawImage(img, 590, 130, 120, 120);
+          ctx.fillStyle = "#10b981";
+          ctx.font = "bold 12px sans-serif";
+          ctx.fillText("TERVERIFIKASI BGN", 590, 280);
+        }
+        
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.2)";
+        ctx.beginPath(); ctx.moveTo(40, 320); ctx.lineTo(760, 320); ctx.stroke();
+        
+        ctx.fillStyle = "#10b981";
+        ctx.font = "12px sans-serif";
+        ctx.fillText(`Diperbarui: ${formatTanggal(tanggalDiperbarui)}`, 40, 350);
+      }
+
+      const dataUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `KISB-${balita.nama.replace(/\s+/g, "_")}-${nomorKartu}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast.success("Berhasil mengunduh Kartu KISB (PNG)!");
     } catch (error) {
       console.error(error);
       toast.error("Gagal mengunduh KISB.");
@@ -248,6 +330,7 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
 
       {/* Kartu KISB visual (signature visual) */}
       <div
+        id="kisb-card-visual"
         ref={cardRef}
         className="relative bg-[#041533] border border-emerald-500/30 rounded-2xl shadow-xl overflow-hidden p-5 sm:p-7"
         aria-label={`Kartu KISB ${balita.nama}`}
@@ -288,47 +371,35 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
               <div className="w-14 h-14 rounded-full bg-[var(--color-success)] text-[#071E49] font-bold text-xl flex items-center justify-center shrink-0">
                 {getInitials(balita.nama)}
               </div>
-              <div className="font-display text-[22px] sm:text-[24px] font-bold text-white leading-tight truncate">
+              <div className="font-display text-[22px] sm:text-[24px] font-bold text-white leading-tight">
                 {balita.nama}
               </div>
             </div>
 
             <div className="space-y-0">
-              <div className="border-b border-white/10 py-2.5 flex items-center justify-between">
-                <div className="text-[var(--color-success)] font-medium text-sm flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  NIK
-                </div>
-                <div className="text-white font-mono font-bold text-[15px]">
-                  {balita.nik}
-                </div>
+              <div className="flex items-center justify-between py-2 border-b border-white/10 text-sm gap-2">
+                <span className="text-[var(--color-success)] font-medium flex items-center gap-2 shrink-0">
+                  <User className="w-4 h-4" /> NIK
+                </span>
+                <span className="text-white font-mono font-bold text-[15px] text-right">{balita.nik}</span>
               </div>
-              <div className="border-b border-white/10 py-2.5 flex items-center justify-between">
-                <div className="text-[var(--color-success)] font-medium text-sm flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Tgl. Lahir
-                </div>
-                <div className="text-white font-medium text-[15px]">
-                  {formatTanggal(balita.tanggalLahir)}
-                </div>
+              <div className="flex items-center justify-between py-2 border-b border-white/10 text-sm gap-2">
+                <span className="text-[var(--color-success)] font-medium flex items-center gap-2 shrink-0">
+                  <Calendar className="w-4 h-4" /> Tgl. Lahir
+                </span>
+                <span className="text-white font-medium text-right">{formatTanggal(balita.tanggalLahir)}</span>
               </div>
-              <div className="border-b border-white/10 py-2.5 flex items-center justify-between">
-                <div className="text-[var(--color-success)] font-medium text-sm flex items-center gap-2">
-                  <UserCheck className="w-4 h-4" />
-                  Jenis Kelamin
-                </div>
-                <div className="text-white font-medium text-[15px]">
-                  {jenisKelaminLabel(balita.jenisKelamin)}
-                </div>
+              <div className="flex items-center justify-between py-2 border-b border-white/10 text-sm gap-2">
+                <span className="text-[var(--color-success)] font-medium flex items-center gap-2 shrink-0">
+                  <UserCheck className="w-4 h-4" /> Jenis Kelamin
+                </span>
+                <span className="text-white font-medium text-right">{jenisKelaminLabel(balita.jenisKelamin)}</span>
               </div>
-              <div className="border-b border-white/10 py-2.5 flex items-center justify-between">
-                <div className="text-[var(--color-success)] font-medium text-sm flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Posyandu
-                </div>
-                <div className="text-white font-medium text-[15px] truncate max-w-[200px] text-right">
-                  {balita.posyanduNama}
-                </div>
+              <div className="flex items-center justify-between py-2 border-b border-white/10 text-sm gap-2">
+                <span className="text-[var(--color-success)] font-medium flex items-center gap-2 shrink-0">
+                  <Users className="w-4 h-4" /> Posyandu
+                </span>
+                <span className="text-white font-medium text-right">{balita.posyanduNama}</span>
               </div>
             </div>
           </div>
