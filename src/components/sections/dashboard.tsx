@@ -11,7 +11,7 @@ import {
 } from "@/lib/mock-data";
 import {
   Users, AlertTriangle, UtensilsCrossed, CalendarClock,
-  Activity, ArrowRight,
+  Activity, ArrowRight, HeartPulse,
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -78,37 +78,77 @@ export function DashboardSection() {
         </div>
 
         <div className="relative z-10 w-full lg:w-[380px] shrink-0 flex flex-col gap-3.5 mt-6 lg:mt-0">
-          <div 
-            onClick={() => setSection("data-balita")}
-            className="bg-gradient-to-r from-[#8cd33a] to-[#76b82a] text-[#071E49] p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer text-left w-full"
-          >
-            <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#588d1d] shadow-sm shrink-0">
-              <Users className="w-6 h-6" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-bold text-[16px] text-[#071E49] leading-snug">Lihat Data Balita</div>
-              <div className="text-xs text-[#071E49]/80 mt-0.5 leading-snug">Lihat riwayat dan perkembangan balita Anda</div>
-            </div>
-            <div className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center text-[#071E49] shadow-sm shrink-0">
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-          
-          <div 
-            onClick={() => setSection("mbg")}
-            className="bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer text-left w-full"
-          >
-            <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#1d4ed8] shadow-sm shrink-0">
-              <UtensilsCrossed className="w-6 h-6" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-bold text-[16px] text-white leading-snug">Monitor Program MBG</div>
-              <div className="text-xs text-white/80 mt-0.5 leading-snug">Pantau pelaksanaan program MBG di wilayah Anda</div>
-            </div>
-            <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white shadow-sm shrink-0">
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
+          {isAdmin ? (
+            <>
+              <div 
+                role="button"
+                tabIndex={0}
+                onClick={(e) => { e.preventDefault(); setSection("data-balita"); }}
+                className="bg-gradient-to-r from-[#8cd33a] to-[#76b82a] text-[#071E49] p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer text-left w-full"
+              >
+                <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#588d1d] shadow-sm shrink-0">
+                  <Users className="w-6 h-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-[16px] text-[#071E49] leading-snug">Lihat Data Balita</div>
+                  <div className="text-xs text-[#071E49]/80 mt-0.5 leading-snug">Lihat riwayat dan perkembangan balita Anda</div>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center text-[#071E49] shadow-sm shrink-0">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+              
+              <div 
+                onClick={() => setSection("mbg")}
+                className="bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer text-left w-full"
+              >
+                <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#1d4ed8] shadow-sm shrink-0">
+                  <UtensilsCrossed className="w-6 h-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-[16px] text-white leading-snug">Monitor Program MBG</div>
+                  <div className="text-xs text-white/80 mt-0.5 leading-snug">Pantau pelaksanaan program MBG di wilayah Anda</div>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white shadow-sm shrink-0">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div 
+                onClick={() => setSection("kisb")}
+                className="bg-gradient-to-r from-[#8cd33a] to-[#76b82a] text-[#071E49] p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer text-left w-full"
+              >
+                <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#588d1d] shadow-sm shrink-0">
+                  <HeartPulse className="w-6 h-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-[16px] text-[#071E49] leading-snug">Lihat KISB Digital</div>
+                  <div className="text-xs text-[#071E49]/80 mt-0.5 leading-snug">Akses kartu identitas &amp; status gizi anak Anda</div>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center text-[#071E49] shadow-sm shrink-0">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+
+              <div 
+                onClick={() => setSection("jadwal")}
+                className="bg-gradient-to-r from-[#1d4ed8] to-[#2563eb] text-white p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer text-left w-full"
+              >
+                <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-[#1d4ed8] shadow-sm shrink-0">
+                  <CalendarClock className="w-6 h-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-[16px] text-white leading-snug">Jadwal Posyandu Terdekat</div>
+                  <div className="text-xs text-white/80 mt-0.5 leading-snug">Pantau jadwal posyandu Anda</div>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white shadow-sm shrink-0">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

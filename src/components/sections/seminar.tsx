@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/lib/auth-store";
 import {
   Dialog,
   DialogContent,
@@ -57,6 +58,8 @@ const statusLabel: Record<Seminar["status"], string> = {
 };
 
 export function SeminarSection() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [filter, setFilter] = useState<StatusFilter>("Semua");
   const [seminarData, setSeminarData] = useState<Seminar[]>(initialSeminarData);
 
@@ -140,17 +143,19 @@ export function SeminarSection() {
         title="Seminar Gizi Gratis untuk Ibu Balita"
         description="Pendaftaran, jadwal, presensi, dan sertifikat elektronik seminar edukasi gizi bersama Puskesmas/BGN."
         actions={
-          <Button
-            onClick={() => setIsBuatSeminarOpen(true)}
-            className="rounded-[8px]"
-            style={{
-              backgroundColor: "var(--color-primary)",
-              color: "#FFFFFF",
-            }}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Buat Seminar Baru
-          </Button>
+          isAdmin && (
+            <Button
+              onClick={() => setIsBuatSeminarOpen(true)}
+              className="rounded-[8px]"
+              style={{
+                backgroundColor: "var(--color-primary)",
+                color: "#FFFFFF",
+              }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Buat Seminar Baru
+            </Button>
+          )
         }
       />
 

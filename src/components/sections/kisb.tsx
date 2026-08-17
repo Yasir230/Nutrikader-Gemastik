@@ -14,6 +14,7 @@ import { SectionHeader, FlatCard } from "@/components/section";
 import { PitaCapaian } from "@/components/pita-capaian";
 import { StatusBadge } from "@/components/status-badge";
 import { useNav } from "@/lib/nav-store";
+import { useAuth } from "@/lib/auth-store";
 import {
   balitaData,
   formatTanggal,
@@ -82,9 +83,11 @@ function jenisKelaminLabel(jk: "L" | "P"): string {
 }
 
 export function KisbSection() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const { selectedBalitaId, openBalita } = useNav();
   const [activeId, setActiveId] = useState<string>(
-    selectedBalitaId ?? balitaData[0]?.id ?? ""
+    isAdmin ? (selectedBalitaId ?? balitaData[0]?.id ?? "") : (balitaData[0]?.id ?? "")
   );
   const cardRef = useRef<HTMLDivElement>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
@@ -151,15 +154,14 @@ export function KisbSection() {
     try {
       let canvas: HTMLCanvasElement | null = null;
       try {
-        canvas = await (html2canvas as any)(cardRef.current, { 
-          scale: 2, 
-          useCORS: true, 
+        canvas = await (html2canvas as any)(cardRef.current, {
+          scale: 3,
+          useCORS: true,
           allowTaint: true,
-          backgroundColor: '#041533', 
+          backgroundColor: '#041533',
           logging: false,
-          scrollX: 0, 
+          scrollX: 0,
           scrollY: 0,
-          onclone: (clonedDoc: any) => {}
         });
       } catch (err) {
         console.warn("html2canvas error, falling back to Canvas 2D:", err);
@@ -168,75 +170,132 @@ export function KisbSection() {
       if (!canvas) {
         canvas = document.createElement("canvas");
         canvas.width = 800;
-        canvas.height = 400;
+        canvas.height = 420;
         const ctx = canvas.getContext("2d");
         if (!ctx) throw new Error("Canvas 2D not supported");
         
+        // Background and border
         ctx.fillStyle = "#041533";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.roundRect(0, 0, canvas.width, canvas.height, 16);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(16, 185, 129, 0.3)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
         
+        // Header Icon
+        ctx.fillStyle = "#10b981";
+        ctx.beginPath();
+        ctx.arc(60, 60, 20, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Header Text
         ctx.fillStyle = "#FFFFFF";
-        ctx.font = "bold 22px sans-serif";
-        ctx.fillText("KARTU INDONESIA SEHAT BALITA", 40, 50);
+        ctx.font = "bold 22px serif";
+        ctx.fillText("KARTU INDONESIA SEHAT BALITA", 95, 55);
         
         ctx.fillStyle = "#10b981";
         ctx.font = "14px sans-serif";
-        ctx.fillText("NutriKader · Badan Gizi Nasional", 40, 75);
+        ctx.fillText("NutriKader · ", 95, 75);
+        ctx.fillStyle = "rgba(165, 243, 252, 0.8)";
+        ctx.fillText("Badan Gizi Nasional", 185, 75);
         
         ctx.fillStyle = "#10b981";
         ctx.font = "bold 12px sans-serif";
-        ctx.fillText("NO. KARTU", 580, 45);
+        ctx.fillText("NO. KARTU", 580, 50);
         ctx.fillStyle = "#FFFFFF";
         ctx.font = "bold 18px monospace";
-        ctx.fillText(nomorKartu, 580, 65);
+        ctx.fillText(nomorKartu, 580, 70);
         
+        // Divider
         ctx.strokeStyle = "rgba(6, 182, 212, 0.2)";
-        ctx.beginPath(); ctx.moveTo(40, 95); ctx.lineTo(760, 95); ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(40, 100); ctx.lineTo(760, 100); ctx.stroke();
         
-        ctx.font = "bold 24px sans-serif";
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillText(balita.nama, 40, 140);
-        
-        ctx.font = "14px sans-serif";
+        // Avatar
         ctx.fillStyle = "#10b981";
-        ctx.fillText("NIK", 40, 180);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.font = "bold 15px monospace";
-        ctx.fillText(balita.nik, 180, 180);
+        ctx.beginPath();
+        ctx.arc(70, 150, 28, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#071E49";
+        ctx.font = "bold 20px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(getInitials(balita.nama), 70, 157);
+        ctx.textAlign = "left";
         
-        ctx.fillStyle = "#10b981";
-        ctx.font = "14px sans-serif";
-        ctx.fillText("Tgl. Lahir", 40, 210);
+        // Name
+        ctx.font = "bold 24px serif";
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillText(formatTanggal(balita.tanggalLahir), 180, 210);
+        ctx.fillText(balita.nama, 115, 157);
         
-        ctx.fillStyle = "#10b981";
-        ctx.fillText("Jenis Kelamin", 40, 240);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillText(jenisKelaminLabel(balita.jenisKelamin), 180, 240);
+        // Metadata Rows
+        const drawRow = (label: string, value: string, y: number) => {
+          ctx.fillStyle = "#10b981";
+          ctx.font = "14px sans-serif";
+          ctx.fillText(label, 40, y);
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = label === "NIK" ? "bold 15px monospace" : "14px sans-serif";
+          ctx.textAlign = "right";
+          ctx.fillText(value, 500, y);
+          ctx.textAlign = "left";
+          
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.beginPath(); ctx.moveTo(40, y + 10); ctx.lineTo(500, y + 10); ctx.stroke();
+        };
         
-        ctx.fillStyle = "#10b981";
-        ctx.fillText("Posyandu", 40, 270);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillText(balita.posyanduNama, 180, 270);
+        drawRow("NIK", balita.nik, 210);
+        drawRow("Tgl. Lahir", formatTanggal(balita.tanggalLahir), 245);
+        drawRow("Jenis Kelamin", jenisKelaminLabel(balita.jenisKelamin), 280);
+        drawRow("Posyandu", balita.posyanduNama, 315);
         
+        // Vertical Divider
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.2)";
+        ctx.beginPath(); ctx.moveTo(540, 130); ctx.lineTo(540, 320); ctx.stroke();
+        
+        // QR Code
         if (qrDataUrl) {
           const img = new Image();
           await new Promise((res) => { img.onload = res; img.src = qrDataUrl; });
+          
           ctx.fillStyle = "#FFFFFF";
-          ctx.fillRect(580, 120, 140, 140);
-          ctx.drawImage(img, 590, 130, 120, 120);
+          ctx.beginPath();
+          ctx.roundRect(580, 130, 140, 140, 12);
+          ctx.fill();
+          
+          ctx.strokeStyle = "#10b981";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          
+          ctx.drawImage(img, 590, 140, 120, 120);
+          
           ctx.fillStyle = "#10b981";
           ctx.font = "bold 12px sans-serif";
-          ctx.fillText("TERVERIFIKASI BGN", 590, 280);
+          ctx.textAlign = "center";
+          ctx.fillText("✓ TERVERIFIKASI BGN", 650, 295);
+          ctx.textAlign = "left";
         }
         
+        // Bottom Divider
         ctx.strokeStyle = "rgba(6, 182, 212, 0.2)";
-        ctx.beginPath(); ctx.moveTo(40, 320); ctx.lineTo(760, 320); ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(40, 350); ctx.lineTo(760, 350); ctx.stroke();
         
-        ctx.fillStyle = "#10b981";
+        // Footer Badges
+        ctx.fillStyle = "rgba(6, 78, 59, 0.6)";
+        ctx.beginPath(); ctx.roundRect(40, 370, 130, 26, 6); ctx.fill();
+        ctx.fillStyle = "#6ee7b7";
         ctx.font = "12px sans-serif";
-        ctx.fillText(`Diperbarui: ${formatTanggal(tanggalDiperbarui)}`, 40, 350);
+        ctx.fillText("● " + (balita.risiko === "tinggi" ? "Risiko Tinggi" : balita.risiko === "sedang" ? "Risiko Sedang" : "Risiko Rendah"), 50, 388);
+        
+        ctx.fillStyle = "rgba(23, 37, 84, 0.6)";
+        ctx.beginPath(); ctx.roundRect(180, 370, 130, 26, 6); ctx.fill();
+        ctx.fillStyle = "#93c5fd";
+        ctx.fillText("● " + (balita.statusPosyandu === "aktif" ? "Aktif Posyandu" : "Lulus Posyandu"), 190, 388);
+        
+        ctx.fillStyle = "rgba(165, 243, 252, 0.8)";
+        ctx.textAlign = "right";
+        ctx.fillText(`Diperbarui: ${formatTanggal(tanggalDiperbarui)}`, 760, 388);
+        ctx.textAlign = "left";
       }
 
       const dataUrl = canvas.toDataURL("image/png");
@@ -303,30 +362,32 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
       />
 
       {/* Pemilih balita */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-        <label
-          className="text-[12px] font-medium uppercase tracking-wide"
-          style={{ color: "var(--color-text-muted)" }}
-          htmlFor="kisb-balita-select"
-        >
-          Pilih Balita
-        </label>
-        <Select value={activeId} onValueChange={setActiveId}>
-          <SelectTrigger
-            id="kisb-balita-select"
-            className="w-full sm:w-[360px] h-9 border-[rgba(7,30,73,0.14)] bg-white text-[var(--color-text)]"
+      {isAdmin && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <label
+            className="text-[12px] font-medium uppercase tracking-wide"
+            style={{ color: "var(--color-text-muted)" }}
+            htmlFor="kisb-balita-select"
           >
-            <SelectValue placeholder="Pilih balita" />
-          </SelectTrigger>
-          <SelectContent className="max-h-80">
-            {balitaData.map((b) => (
-              <SelectItem key={b.id} value={b.id}>
-                <span className="truncate">{b.nama} — NIK {b.nik}</span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+            Pilih Balita
+          </label>
+          <Select value={activeId} onValueChange={setActiveId}>
+            <SelectTrigger
+              id="kisb-balita-select"
+              className="w-full sm:w-[360px] h-9 border-[rgba(7,30,73,0.14)] bg-white text-[var(--color-text)]"
+            >
+              <SelectValue placeholder="Pilih balita" />
+            </SelectTrigger>
+            <SelectContent className="max-h-80">
+              {balitaData.map((b) => (
+                <SelectItem key={b.id} value={b.id}>
+                  <span className="truncate">{b.nama} — NIK {b.nik}</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* Kartu KISB visual (signature visual) */}
       <div

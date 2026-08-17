@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useAuth } from "@/lib/auth-store";
 import { SectionHeader } from "@/components/section";
 import { StatusBadge } from "@/components/status-badge";
 import { edukasiData, formatTanggal } from "@/lib/mock-data";
@@ -53,6 +54,9 @@ const kategoriTone: Record<
 };
 
 export function EdukasiSection() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
   const [kategori, setKategori] = useState<KategoriFilter>("Semua");
   const [wilayah, setWilayah] = useState<string>("Semua");
   const [search, setSearch] = useState("");
@@ -106,17 +110,19 @@ export function EdukasiSection() {
         title="Edukasi Gizi Pangan Lokal"
         description="Konten edukasi dan rekomendasi menu berbasis pangan lokal sesuai wilayah pengguna."
         actions={
-          <Button
-            onClick={() => setIsAddOpen(true)}
-            className="rounded-[8px]"
-            style={{
-              backgroundColor: "var(--color-primary)",
-              color: "#FFFFFF",
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            Tambah Modul Edukasi
-          </Button>
+          isAdmin && (
+            <Button
+              onClick={() => setIsAddOpen(true)}
+              className="rounded-[8px]"
+              style={{
+                backgroundColor: "var(--color-primary)",
+                color: "#FFFFFF",
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Tambah Modul Edukasi
+            </Button>
+          )
         }
       />
 

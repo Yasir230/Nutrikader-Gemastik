@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useNav } from "@/lib/nav-store";
+import { useAuth } from "@/lib/auth-store";
 import { jadwalData, formatTanggal, formatTanggalPanjang } from "@/lib/mock-data";
 import type { JadwalPosyandu } from "@/lib/types";
 import {
@@ -300,6 +301,8 @@ function JadwalItem({ j }: { j: JadwalPosyandu }) {
 }
 
 export function JadwalSection() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [jadwalList, setJadwalList] = useState<JadwalPosyandu[]>(
     Array.isArray(jadwalData) ? jadwalData : []
   );
@@ -396,10 +399,12 @@ export function JadwalSection() {
             description="Pengingat jadwal pencatatan rutin, penimbangan, imunisasi, dan penyuluhan posyandu."
           />
         </div>
-        <Button onClick={() => setIsAddOpen(true)} className="shrink-0">
-          <Plus className="w-4 h-4 mr-2" />
-          Tambah Jadwal Baru
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => setIsAddOpen(true)} className="shrink-0">
+            <Plus className="w-4 h-4 mr-2" />
+            Tambah Jadwal Baru
+          </Button>
+        )}
       </div>
 
       {/* KPI strip kecil */}
