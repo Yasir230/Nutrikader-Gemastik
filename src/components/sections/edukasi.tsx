@@ -104,7 +104,7 @@ export function EdukasiSection() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <SectionHeader
         eyebrow="EDUKASI & SEMINAR"
         title="Edukasi Gizi Pangan Lokal"
@@ -185,7 +185,7 @@ export function EdukasiSection() {
       {filtered.length === 0 ? (
         <EdukasiEmpty />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-full">
           {filtered.map((m) => (
             <EdukasiCard key={m.id} modul={m} onOpen={() => setSelected(m)} />
           ))}
@@ -415,7 +415,7 @@ function EdukasiCard({
       type="button"
       onClick={onOpen}
       aria-label={`Buka modul: ${modul.judul}`}
-      className="text-left h-full rounded-[8px] border p-4 flex flex-col gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:[--tw-ring-color:var(--color-success)] cursor-pointer"
+      className="text-left h-full rounded-[8px] border p-4 flex flex-col gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:[--tw-ring-color:var(--color-success)] cursor-pointer min-w-0 overflow-hidden"
       style={{
         backgroundColor: "#FFFFFF",
         borderColor: "rgba(7,30,73,0.08)",

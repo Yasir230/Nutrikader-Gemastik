@@ -108,7 +108,7 @@ export function PengaturanSection() {
   const initials = displayName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <SectionHeader
         eyebrow="SISTEM"
         title="Pengaturan"

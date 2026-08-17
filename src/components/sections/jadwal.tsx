@@ -390,7 +390,7 @@ export function JadwalSection() {
     : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="flex-1">
           <SectionHeader
