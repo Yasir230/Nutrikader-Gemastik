@@ -30,7 +30,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-[240px] shrink-0 sticky top-0 h-screen"
+      className="hidden md:flex flex-col w-[240px] shrink-0 fixed inset-y-0 left-0 z-40"
       style={{
         backgroundColor: "var(--color-primary)",
         color: "var(--color-sidebar-foreground)",

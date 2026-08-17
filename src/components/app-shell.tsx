@@ -39,7 +39,7 @@ export function AppShell() {
   return (
     <div className="flex min-h-screen max-w-full overflow-x-hidden" data-role={role} style={{ backgroundColor: "var(--color-bg)" }}>
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-w-0 max-w-full overflow-x-hidden md:pl-[240px]">
         <Topbar />
         <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 pb-24 md:pb-8 lg:pb-10 max-w-[1280px] w-full mx-auto overflow-x-hidden">
           {effectiveSection === "dashboard" && <DashboardSection />}
