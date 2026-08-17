@@ -122,7 +122,9 @@ export function KisbSection() {
       try {
         const url = `https://nutrikader-gemastik.vercel.app/kisb/${balita.nik}?ts=${Date.now()}&sig=VERIFIED`;
         const dataUrl = await QRCode.toDataURL(url, {
+          width: 400,
           margin: 1,
+          errorCorrectionLevel: 'H',
           color: {
             dark: '#071E49',
             light: '#FFFFFF'
@@ -139,7 +141,7 @@ export function KisbSection() {
   const handleDownload = async () => {
     if (!cardRef.current) return;
     try {
-      const canvas = await html2canvas(cardRef.current, { scale: 3, useCORS: true, backgroundColor: null });
+      const canvas = await html2canvas(cardRef.current, { scale: 3, useCORS: true, backgroundColor: '#071E49', logging: false });
       const link = document.createElement("a");
       link.download = `KISB-${balita.nama.replace(/\s+/g, "_")}-${nomorKartu}.png`;
       link.href = canvas.toDataURL("image/png");
@@ -254,16 +256,16 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
               >
                 <HeartPulse className="w-5 h-5" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0" style={{ lineHeight: 1.3, paddingTop: "4px", overflow: "visible" }}>
                 <div
-                  className="font-display text-[16px] sm:text-[18px] leading-tight"
-                  style={{ fontWeight: 500, color: "#FFFFFF" }}
+                  className="font-display text-[16px] sm:text-[18px]"
+                  style={{ fontWeight: 500, color: "#FFFFFF", lineHeight: 1.3, overflow: "visible" }}
                 >
                   KARTU INDONESIA SEHAT BALITA
                 </div>
                 <div
                   className="text-[11px] sm:text-[12px] mt-0.5"
-                  style={{ color: "var(--color-info)" }}
+                  style={{ color: "var(--color-info)", lineHeight: 1.3 }}
                 >
                   NutriKader · Badan Gizi Nasional
                 </div>
@@ -306,49 +308,37 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
               </div>
               <div className="min-w-0 space-y-1.5">
                 <div
-                  className="font-display text-[20px] leading-tight truncate"
-                  style={{ fontWeight: 500, color: "#FFFFFF" }}
+                  className="font-display text-[20px]"
+                  style={{ fontWeight: 500, color: "#FFFFFF", lineHeight: 1.3, paddingTop: "4px", overflow: "visible" }}
                 >
                   {balita.nama}
                 </div>
-                <div className="space-y-0.5 text-[12px] sm:text-[13px]" style={{ color: "var(--color-info)" }}>
-                  <div className="flex items-center gap-2">
-                    <span className="opacity-80 w-[68px] shrink-0">NIK</span>
-                    <span className="font-data" style={{ color: "#FFFFFF" }}>{balita.nik}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="opacity-80 w-[68px] shrink-0">Tgl. Lahir</span>
-                    <span style={{ color: "#FFFFFF" }}>{formatTanggal(balita.tanggalLahir)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="opacity-80 w-[68px] shrink-0">Jenis Kelamin</span>
-                    <span style={{ color: "#FFFFFF" }}>{jenisKelaminLabel(balita.jenisKelamin)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="opacity-80 w-[68px] shrink-0">Posyandu</span>
-                    <span className="truncate" style={{ color: "#FFFFFF" }}>{balita.posyanduNama}</span>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-white/90 text-[12px] sm:text-[13px] pt-1">
+                  <div><span className="text-white/60 text-xs block">NIK</span><span className="font-mono font-medium text-white">{balita.nik}</span></div>
+                  <div><span className="text-white/60 text-xs block">Tanggal Lahir</span><span className="font-medium text-white">{formatTanggal(balita.tanggalLahir)}</span></div>
+                  <div><span className="text-white/60 text-xs block">Jenis Kelamin</span><span className="font-medium text-white">{jenisKelaminLabel(balita.jenisKelamin)}</span></div>
+                  <div><span className="text-white/60 text-xs block">Posyandu</span><span className="font-medium text-white truncate block">{balita.posyanduNama}</span></div>
                 </div>
               </div>
             </div>
 
             {/* Kanan: QR */}
-            <div className="flex flex-col items-center sm:items-end gap-1.5">
+            <div className="flex flex-col items-center sm:items-end gap-2">
               {qrDataUrl ? (
                 <img 
                   src={qrDataUrl} 
                   alt="QR Code Verifikasi KISB" 
-                  className="w-[88px] h-[88px] rounded-[4px] border border-[rgba(7,30,73,0.18)] bg-white"
+                  className="w-32 h-32 sm:w-36 sm:h-36 p-2 bg-white rounded-lg border border-[rgba(7,30,73,0.18)]"
                 />
               ) : (
-                <div className="w-[88px] h-[88px] rounded-[4px] border border-[rgba(7,30,73,0.18)] bg-white animate-pulse" />
+                <div className="w-32 h-32 sm:w-36 sm:h-36 p-2 bg-white rounded-lg border border-[rgba(7,30,73,0.18)] animate-pulse" />
               )}
               <div
-                className="text-[10px] uppercase tracking-wider flex items-center gap-1 font-semibold"
+                className="text-[10px] uppercase tracking-wider flex items-center gap-1 font-semibold mt-1 bg-white/10 px-2 py-1 rounded"
                 style={{ color: "var(--color-success)" }}
               >
-                <CheckCircle2 className="w-3 h-3" />
-                Terverifikasi BGN
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                VERIFIKASI RESMI BGN
               </div>
             </div>
           </div>
@@ -503,12 +493,21 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
           <div className="text-[11px] mb-2" style={{ color: "var(--color-text-muted)" }}>
             Kelengkapan sesuai usia {balita.usiaBulan} bulan
           </div>
-          <PitaCapaian
-            value={imunisasiPct}
-            state={imunisasiPct >= 90 ? "on-track" : imunisasiPct >= 60 ? "attention" : "critical"}
-            segments={10}
-            label={`${imunisasiPct}% lengkap`}
-          />
+          <div className="w-full mt-1 mb-2">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[11px] font-medium" style={{ color: "var(--color-text-muted)" }}>Progress</span>
+              <span className="text-[12px] font-bold" style={{ color: imunisasiPct >= 90 ? "var(--color-success)" : imunisasiPct >= 60 ? "var(--color-warning)" : "var(--color-critical)" }}>{imunisasiPct}%</span>
+            </div>
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden">
+              <div 
+                className="h-2.5 rounded-full transition-all duration-500 ease-in-out" 
+                style={{ 
+                  width: `${imunisasiPct}%`,
+                  background: imunisasiPct >= 90 ? "linear-gradient(90deg, #10b981 0%, #34d399 100%)" : imunisasiPct >= 60 ? "linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)" : "linear-gradient(90deg, #ef4444 0%, #f87171 100%)"
+                }}
+              ></div>
+            </div>
+          </div>
           <div className="mt-3 pt-3" style={{ borderTop: "1px solid rgba(181, 224, 234, 0.5)" }}>
             <div className="text-[11px] uppercase tracking-wide mb-2" style={{ color: "var(--color-text-muted)" }}>
               3 Imunisasi Terakhir
@@ -577,10 +576,10 @@ Verifikasi kartu: https://nutrikader-gemastik.vercel.app`;
               {mbgTerakhir.length > 0 ? mbgTerakhir.map((m) => (
                 <li key={m.id} className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="text-[12px] truncate" style={{ color: "var(--color-text)" }}>
+                    <div className="text-[12px] break-words" style={{ color: "var(--color-text)" }}>
                       {m.menu}
                     </div>
-                    <div className="font-data text-[11px]" style={{ color: "var(--color-text-muted)" }}>
+                    <div className="font-data text-[11px] mt-0.5" style={{ color: "var(--color-text-muted)" }}>
                       {formatTanggal(m.tanggal)} · {m.porsi} porsi
                     </div>
                   </div>

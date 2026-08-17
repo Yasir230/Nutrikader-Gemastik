@@ -66,24 +66,22 @@ export function DashboardSection() {
             }
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setSection("mbg")}
-            className="px-3 py-2 rounded-[8px] text-[13px] font-medium inline-flex items-center gap-1.5"
-            style={{ backgroundColor: "var(--color-success)", color: "var(--color-primary)" }}
-          >
-            <UtensilsCrossed className="w-4 h-4" />
-            Monitor MBG
-          </button>
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 mt-4 sm:mt-0">
           <button
             type="button"
             onClick={() => setSection("data-balita")}
-            className="px-3 py-2 rounded-[8px] text-[13px] font-medium border inline-flex items-center gap-1.5"
-            style={{ borderColor: "rgba(181,224,234,0.4)", color: "#FFFFFF" }}
+            className="bg-[var(--color-success)] text-[#071E49] hover:opacity-90 font-semibold px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-sm transition-all"
           >
             Lihat Data Balita
             <ArrowRight className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setSection("mbg")}
+            className="bg-white/10 text-white hover:bg-white/20 border border-white/20 font-medium px-4 py-2.5 rounded-lg flex items-center gap-2 backdrop-blur-sm transition-all"
+          >
+            <UtensilsCrossed className="w-4 h-4" />
+            Monitor Program MBG
           </button>
         </div>
       </div>
@@ -180,7 +178,7 @@ export function DashboardSection() {
                 <li key={p.id}>
                   <div className="flex items-center justify-between mb-1.5 gap-2">
                     <div className="min-w-0">
-                      <div className="text-[13px] font-semibold truncate" style={{ color: "var(--color-text)" }}>{p.nama}</div>
+                      <div className="text-[13px] font-semibold" style={{ color: "var(--color-text)" }}>{p.nama}</div>
                       <div className="text-[11px]" style={{ color: "var(--color-text-muted)" }}>{p.kelurahan} · {p.balitaAktif} balita</div>
                     </div>
                     {p.status === "perlu_perhatian" && <StatusBadge tone="warning">Perlu Perhatian</StatusBadge>}
@@ -266,7 +264,7 @@ export function DashboardSection() {
               <li key={p.id} className="p-3 rounded-[6px] border" style={{ borderColor: "rgba(7,30,73,0.08)", backgroundColor: "var(--color-bg)" }}>
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="min-w-0">
-                    <div className="text-[13px] font-semibold truncate" style={{ color: "var(--color-text)" }}>{p.nama}</div>
+                    <div className="text-[13px] font-semibold" style={{ color: "var(--color-text)" }}>{p.nama}</div>
                     <div className="text-[11px]" style={{ color: "var(--color-text-muted)" }}>{p.kelurahan} · Jadwal berikut: {formatTanggal(p.jadwalBerikutnya)}</div>
                   </div>
                   <StatusBadge tone={p.status === "perlu_perhatian" ? "warning" : "critical"}>{p.status === "perlu_perhatian" ? "Perlu Perhatian" : "Kritis"}</StatusBadge>
